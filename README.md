@@ -20,10 +20,19 @@ This project is being implemented in four milestones over an eight-week timeline
 
 | Milestone | Focus Area | Status |
 |---|---|---|
-| Milestone 1 (Week 1–2) | Project setup, authentication, site management, dataset integration | In Progress |
-| Milestone 2 (Week 3–4) | Environmental intelligence engine, solar and wind prediction models | Not Started |
+| Milestone 1 (Week 1–2) | Project setup, authentication, site management, dataset integration | Completed |
+| Milestone 2 (Week 3–4) | Environmental intelligence engine, solar and wind prediction models | In Progress |
 | Milestone 3 (Week 5–6) | Site suitability engine, deployment optimization, forecasting, dashboards | Not Started |
 | Milestone 4 (Week 7–8) | Analytics, testing, containerization, deployment | Not Started |
+
+### Milestone 1 — Completed
+
+- Finalized system architecture and PostGIS database schema (users, projects, sites)
+- Set up FastAPI backend and Next.js frontend environments
+- Implemented custom JWT-based authentication (register, login, refresh) with role-based access control
+- Built project and site management CRUD workflows
+- Set up Docker and Docker Compose for local development
+- Began integration of environmental datasets (NASA POWER, OSM Overpass)
 
 Note: This README will be updated as each milestone is completed.
 

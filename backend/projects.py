@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import models, schemas, database
 from auth import get_current_user
+from ingestion import fetch_nasa_power_data
+from geoalchemy2.shape import to_shape
 
 router = APIRouter(prefix="/projects", tags=["Project & Site Management"])
 
@@ -39,3 +41,27 @@ def register_site(project_id: str, site: schemas.SiteCreate, db: Session = Depen
     db.add(new_site)
     db.commit()
     return {"message": f"Site {site.name} registered successfully"}
+
+@router.get("/{project_id}/sites/{site_id}/data", status_code=status.HTTP_200_OK)
+async def get_site_environmental_data(project_id: str, site_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    # 1. Verify project and site ownership
+    project = db.query(models.Project).filter(models.Project.id == project_id, models.Project.owner_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found or unauthorized")
+        
+    site = db.query(models.Site).filter(models.Site.id == site_id, models.Site.project_id == project.id).first()
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    # 2. Extract raw lat/lon from PostGIS Geometry
+    point = to_shape(site.coordinates)
+    longitude, latitude = point.x, point.y
+
+    # 3. Fetch live data from NASA
+    environmental_data = await fetch_nasa_power_data(latitude=latitude, longitude=longitude)
+    
+    return {
+        "site_name": site.name,
+        "coordinates": {"latitude": latitude, "longitude": longitude},
+        "environmental_baseline": environmental_data
+    }

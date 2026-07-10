@@ -20,6 +20,12 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(databas
     db.refresh(new_project)
     return {"message": "Project created successfully", "project_id": new_project.id}
 
+@router.get("/", response_model=list[schemas.ProjectCreate]) # Reusing the schema for simplicity right now
+def get_user_projects(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    # Fetch all projects owned by the currently logged-in user
+    projects = db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()
+    return projects
+
 @router.post("/{project_id}/sites", status_code=status.HTTP_201_CREATED)
 def register_site(project_id: str, site: schemas.SiteCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
     # Verify project belongs to user

@@ -7,7 +7,18 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SiteScout API")
 
-app.include_router(auth.router)
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
@@ -15,11 +26,3 @@ def root():
 
 app.include_router(auth.router)
 app.include_router(projects.router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # Allow Next.js frontend
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)

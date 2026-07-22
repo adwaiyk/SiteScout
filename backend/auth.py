@@ -31,14 +31,16 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+
+    raw_password = user.password.get_secret_value() if hasattr(user.password, 'get_secret_value') else user.password
+    hashed_password = get_password_hash(raw_password) 
     
-    hashed_password = get_password_hash(user.password)
     new_user = models.User(
         email=user.email,
         password_hash=hashed_password,
         full_name=user.full_name,
         role=user.role,
-        organization=user.organization
+        organization=user.organization if hasattr(user, 'organization') else "Independent"
     )
     db.add(new_user)
     db.commit()

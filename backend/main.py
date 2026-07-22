@@ -3,6 +3,7 @@ import auth, models, projects
 from database import engine
 from fastapi.middleware.cors import CORSMiddleware
 import analysis
+import projects
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -27,6 +28,4 @@ def root():
 
 app.include_router(auth.router)
 app.include_router(projects.router)
-
-app.include_router(auth.router)
 app.include_router(analysis.router)

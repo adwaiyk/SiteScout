@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import api from '@/lib/api'; // Using our custom Axios interceptor
 import {
   Dialog,
   DialogContent,
@@ -27,9 +28,7 @@ const MapScanner = dynamic(() => import("@/components/MapScanner"), {
 });
 
 export default function DashboardPage() {
-  const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(
-    null,
-  );
+  const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(null);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,21 +47,18 @@ export default function DashboardPage() {
     setSaveSuccess(false);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/analysis/scan-site", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          latitude: lat,
-          longitude: lon,
-          system_capacity_kw: 1000,
-        }),
+      // 🚀 Replaced fetch with api.post
+      const res = await api.post("/api/analysis/scan-site", {
+        latitude: lat,
+        longitude: lon,
+        system_capacity_kw: 1000,
       });
 
-      if (!res.ok) throw new Error("Failed to analyze site coordinates.");
-      const data = await res.json();
-      setAnalysis(data);
+      // Axios automatically parses JSON to res.data
+      setAnalysis(res.data);
     } catch (err: any) {
-      setError(err.message || "Error scanning site.");
+      // Axios wraps backend errors in err.response.data
+      setError(err.response?.data?.detail || err.message || "Error scanning site.");
     } finally {
       setLoading(false);
     }
@@ -73,53 +69,30 @@ export default function DashboardPage() {
     setIsSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
+      // 🚀 No need to manually grab the token or set headers! 
+      // api.ts handles all of that automatically.
 
       // 1. Create the Project
-      const projRes = await fetch("http://127.0.0.1:8000/projects/", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          name: projectName,
-          description: "Saved via Map Scanner",
-        }),
+      const projRes = await api.post("/projects/", {
+        name: projectName,
+        description: "Saved via Map Scanner",
       });
-      if (!projRes.ok) throw new Error("Failed to create project");
-      const projData = await projRes.json();
+      const projData = projRes.data;
 
       // 2. Register the Site to the Project
-      const siteRes = await fetch(
-        `http://127.0.0.1:8000/projects/${projData.project_id}/sites`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            name: siteName,
-            latitude: selectedCoords[0],
-            longitude: selectedCoords[1],
-            region: "India",
-            land_area_sqkm: 5.0,
-            elevation_m: 0.0,
-            land_ownership: "Unknown",
-          }),
-        },
-      );
-      if (!siteRes.ok) throw new Error("Failed to register site");
-      const siteData = await siteRes.json();
+      const siteRes = await api.post(`/projects/${projData.project_id}/sites`, {
+        name: siteName,
+        latitude: selectedCoords[0],
+        longitude: selectedCoords[1],
+        region: "India",
+        land_area_sqkm: 5.0,
+        elevation_m: 0.0,
+        land_ownership: "Unknown",
+      });
+      const siteData = siteRes.data;
 
       // 3. Save the actual Analysis Log to the database!
-      const analyzeRes = await fetch(
-        `http://127.0.0.1:8000/projects/${projData.project_id}/sites/${siteData.site_id}/analyze`,
-        {
-          method: "POST",
-          headers,
-        },
-      );
-      if (!analyzeRes.ok) throw new Error("Failed to save scan logs");
+      await api.post(`/projects/${projData.project_id}/sites/${siteData.site_id}/analyze`);
 
       setSaveSuccess(true);
       setTimeout(() => {
@@ -128,9 +101,9 @@ export default function DashboardPage() {
         setProjectName("");
         setSiteName("");
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error saving project. Make sure you are logged in!");
+      alert(err.response?.data?.detail || "Error saving project. Make sure you are logged in!");
     } finally {
       setIsSaving(false);
     }

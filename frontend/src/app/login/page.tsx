@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Loader2, GalleryVerticalEnd } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  // If the user is already logged in, redirect them immediately to the dashboard
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const API_URL = "http://127.0.0.1:8000";
 
@@ -31,7 +41,10 @@ export default function LoginPage() {
       });
 
       localStorage.setItem("token", response.data.access_token);
-      window.location.href = "/dashboard";
+      
+      // Use Next.js router.replace instead of window.location.href
+      // This overwrites the login page in the browser history stack
+      router.replace("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Invalid email or password.");
     } finally {

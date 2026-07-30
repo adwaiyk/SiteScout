@@ -11,7 +11,16 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 if not SQLALCHEMY_DATABASE_URL:
     raise ValueError("DATABASE_URL is missing from the .env file!")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Update your create_engine call to include these arguments:
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,      # Tests the connection before sending a query
+    pool_recycle=300,        # Recycles connections after 5 minutes
+    connect_args={
+        "sslmode": "require" # Forces psycopg2 to use SSL
+    }
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

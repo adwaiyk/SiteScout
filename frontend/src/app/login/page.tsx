@@ -42,6 +42,11 @@ export default function LoginPage() {
 
       localStorage.setItem("token", response.data.access_token);
       
+      // 🚀 Save user data for the sidebar's Optimistic UI
+      // Falls back to the email entered in the form if the API doesn't return it
+      localStorage.setItem("userName", response.data.username || "SiteScout User");
+      localStorage.setItem("userEmail", response.data.email || email);
+      
       // Use Next.js router.replace instead of window.location.href
       // This overwrites the login page in the browser history stack
       router.replace("/dashboard");

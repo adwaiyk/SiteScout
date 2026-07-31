@@ -1,8 +1,7 @@
 "use client";
 
-import api from "@/lib/api";
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
 import {
   Sidebar,
   SidebarContent,
@@ -50,78 +49,17 @@ import {
 import Link from "next/link";
 
 export function AppSidebar() {
-  const [user, setUser] = useState({
-    name: "Loading...",
-    email: "...",
-    initials: "--",
-  });
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    // 1. Instantly load from localStorage for a snappy UI update
-    const storedName = localStorage.getItem("userName");
-    const storedEmail = localStorage.getItem("userEmail");
-
-    if (storedName) {
-      const initials = storedName
-        .split(" ")
-        .map((n) => n[0])
-        .filter(Boolean)
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-
-      setUser({
-        name: storedName,
-        email: storedEmail || "",
-        initials: initials || "SU",
-      });
-    }
-
-    // 2. Attempt to fetch fresh data from the backend in the background
-    const fetchUserProfile = async () => {
-      try {
-        const response = await api.get("/users/me");
-        const userData = response.data;
-
-        const name =
-          userData.full_name || userData.username || "SiteScout User";
-        const email = userData.email || "";
-        const initials = name
-          .split(" ")
-          .map((n: string) => n[0])
-          .filter(Boolean)
-          .join("")
-          .toUpperCase()
-          .slice(0, 2);
-
-        setUser({ name, email, initials });
-
-        // Sync fresh data back to localStorage
-        localStorage.setItem("userName", name);
-        localStorage.setItem("userEmail", email);
-      } catch (error) {
-        console.warn(
-          "Could not fetch user profile (check backend route). Relying on localStorage fallback.",
-        );
-
-        // Only use the hardcoded admin if there was NO data in localStorage
-        if (!storedName) {
-          setUser({
-            name: "SiteScout Admin",
-            email: "admin@sitescout.io",
-            initials: "SA",
-          });
-        }
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.replace("/login");
-  };
+  const displayName = user?.name || "SiteScout User";
+  const displayEmail = user?.email || "";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "SU";
 
   return (
     <Sidebar
@@ -310,13 +248,13 @@ export function AppSidebar() {
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarFallback className="rounded-lg bg-muted text-foreground font-medium text-xs">
-                      {user.initials}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate font-semibold">{displayName}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
+                      {displayEmail}
                     </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
@@ -331,13 +269,13 @@ export function AppSidebar() {
                 <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarFallback className="rounded-lg bg-muted text-foreground font-medium text-xs">
-                      {user.initials}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate font-semibold">{displayName}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
+                      {displayEmail}
                     </span>
                   </div>
                 </div>
@@ -357,7 +295,7 @@ export function AppSidebar() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={handleLogout}
+                  onClick={logout}
                   className="gap-2 cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="h-4 w-4" /> Log out

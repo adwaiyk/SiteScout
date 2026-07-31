@@ -28,10 +28,12 @@ api.interceptors.response.use(
       console.warn("Session expired. Logging out...");
       
       if (typeof window !== 'undefined') {
-        // Erase the dead token
+        // Erase the dead token and all cached user data
         localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
         
-        // Brute-force redirect back to login
+        // Redirect back to login
         window.location.replace('/login');
       }
     }

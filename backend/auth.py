@@ -26,7 +26,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-@router.post("/register", response_model=schemas.Token)
+@router.post("/register", response_model=schemas.LoginResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
@@ -47,9 +47,15 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db.refresh(new_user)
     
     access_token = create_access_token(data={"sub": new_user.email, "role": new_user.role})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": new_user.full_name,
+        "email": new_user.email,
+        "full_name": new_user.full_name,
+    }
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login", response_model=schemas.LoginResponse)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     # Swagger sends the email in the 'username' field of the form data
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
@@ -61,7 +67,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         )
     
     access_token = create_access_token(data={"sub": user.email, "role": user.role})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": user.full_name,
+        "email": user.email,
+        "full_name": user.full_name,
+    }
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -83,3 +95,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+@router.get("/me", response_model=schemas.UserProfile)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    """Return the current authenticated user's profile."""
+    return {
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "role": current_user.role,
+        "organization": current_user.organization,
+    }

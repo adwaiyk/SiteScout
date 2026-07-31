@@ -12,6 +12,19 @@ class UserCreate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class LoginResponse(Token):
+    """Extended token response that includes user profile data for the frontend."""
+    username: str
+    email: str
+    full_name: str
+
+class UserProfile(BaseModel):
+    """Schema for the /auth/me endpoint."""
+    email: str
+    full_name: str
+    role: str
+    organization: Optional[str] = None
     
 class ProjectCreate(BaseModel):
     name: str

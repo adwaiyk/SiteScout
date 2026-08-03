@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useAuth } from "@/context/auth-context";
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,55 +33,92 @@ import {
 import {
   GalleryVerticalEnd,
   Folder,
-  PieChart,
-  Sliders,
   FileText,
   Calculator,
-  MoreHorizontal,
+  Sliders,
+  User,
+  Key,
   ChevronDown,
   ChevronsUpDown,
   LogOut,
-  User,
-  CreditCard,
   Bell,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import api from "@/lib/api";
 
 export function AppSidebar() {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState({
+    name: "SiteScout Admin",
+    email: "admin@sitescout.io",
+    initials: "SA",
+  });
 
-  const displayName = user?.name || "SiteScout User";
-  const displayEmail = user?.email || "";
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .filter(Boolean)
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "SU";
+  useEffect(() => {
+    // 1. Optimistic load from localStorage
+    const storedName = localStorage.getItem("userName");
+    const storedEmail = localStorage.getItem("userEmail");
+
+    if (storedName) {
+      const initials = storedName
+        .split(" ")
+        .map((n) => n[0])
+        .filter(Boolean)
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+
+      setUser({
+        name: storedName,
+        email: storedEmail || "",
+        initials: initials || "SU",
+      });
+    }
+
+    // 2. Sync background profile from API
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get("/auth/me");
+        const userData = response.data;
+
+        const name = userData.full_name || userData.username || "SiteScout User";
+        const email = userData.email || "";
+        const initials = name
+          .split(" ")
+          .map((n: string) => n[0])
+          .filter(Boolean)
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+
+        setUser({ name, email, initials });
+        localStorage.setItem("userName", name);
+        localStorage.setItem("userEmail", email);
+      } catch (error) {
+        console.warn("Could not fetch user profile from backend API.");
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.replace("/login");
+  };
 
   return (
-    <Sidebar
-      variant="inset"
-      className="border-r border-border bg-sidebar text-sidebar-foreground"
-    >
-      {/* 1. HEADER */}
+    <Sidebar variant="inset" className="border-r border-border bg-sidebar text-sidebar-foreground">
+      {/* HEADER */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold">
                 <GalleryVerticalEnd className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">SiteScout</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  Enterprise
-                </span>
+                <span className="truncate text-xs text-muted-foreground">Enterprise</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
             </SidebarMenuButton>
@@ -90,81 +127,47 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* 2. PLATFORM GROUP */}
+        {/* PLATFORM GROUP */}
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Workspace */}
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  {/* 🚀 Removed asChild, SidebarMenuButton acts as a standard div inside the trigger */}
-                  <CollapsibleTrigger className="w-full focus:outline-none">
-                    <SidebarMenuButton
-                      render={<div />}
-                      className="w-full cursor-pointer"
-                    >
-                      <Folder className="h-4 w-4 mr-2" />
-                      <span>Workspace</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="border-l border-border ml-3.5 pl-2 space-y-1">
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard" />}
-                        >
-                          Map Scanner
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard/projects" />}
-                        >
-                          My Projects
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/dashboard/projects" />}>
+                  <Folder className="h-4 w-4 mr-2" />
+                  <span>My Projects</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-              {/* Analytics */}
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger className="w-full focus:outline-none">
-                    <SidebarMenuButton
-                      render={<div />}
-                      className="w-full cursor-pointer"
-                    >
-                      <PieChart className="h-4 w-4 mr-2" />
-                      <span>Analytics</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="border-l border-border ml-3.5 pl-2 space-y-1">
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard/financial" />}
-                        >
-                          Financial Engine
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard/lcoe" />}
-                        >
-                          LCOE Reports
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+        {/* TOOLS & REPORTS GROUP */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Tools &amp; Reports</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/dashboard/reports" />}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  <span>Feasibility Reports</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/dashboard/calculator" />}>
+                  <Calculator className="h-4 w-4 mr-2" />
+                  <span>Yield Calculator</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-              {/* Settings */}
+        {/* SETTINGS GROUP (Collapsible) */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger className="w-full focus:outline-none">
@@ -173,23 +176,19 @@ export function AppSidebar() {
                       className="w-full cursor-pointer"
                     >
                       <Sliders className="h-4 w-4 mr-2" />
-                      <span>Settings</span>
+                      <span>Account Settings</span>
                       <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub className="border-l border-border ml-3.5 pl-2 space-y-1">
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard/profile" />}
-                        >
+                        <SidebarMenuSubButton render={<Link href="/dashboard/profile" />}>
                           Profile
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          render={<Link href="/dashboard/api-keys" />}
-                        >
+                        <SidebarMenuSubButton render={<Link href="/dashboard/api-keys" />}>
                           API Keys
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -200,46 +199,13 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* 3. PROJECTS GROUP */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/dashboard/reports" />}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span>Feasibility Reports</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  render={<Link href="/dashboard/calculator" />}
-                >
-                  <Calculator className="h-4 w-4 mr-2" />
-                  <span>Yield Calculator</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  render={<Link href="/dashboard/more" />}
-                  className="text-muted-foreground cursor-pointer"
-                >
-                  <MoreHorizontal className="h-4 w-4 mr-2" />
-                  <span>More</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
-      {/* 4. FOOTER */}
+      {/* FOOTER */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              {/* 🚀 Removed asChild, SidebarMenuButton acts as a standard div inside the trigger */}
               <DropdownMenuTrigger className="w-full focus:outline-none">
                 <SidebarMenuButton
                   render={<div />}
@@ -248,14 +214,12 @@ export function AppSidebar() {
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarFallback className="rounded-lg bg-muted text-foreground font-medium text-xs">
-                      {initials}
+                      {user.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{displayName}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {displayEmail}
-                    </span>
+                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
                 </SidebarMenuButton>
@@ -269,33 +233,24 @@ export function AppSidebar() {
                 <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarFallback className="rounded-lg bg-muted text-foreground font-medium text-xs">
-                      {initials}
+                      {user.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{displayName}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {displayEmail}
-                    </span>
+                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="gap-2 cursor-pointer">
-                  <Sparkles className="h-4 w-4" /> Upgrade to Pro
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 cursor-pointer">
                   <User className="h-4 w-4" /> Account
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 cursor-pointer">
-                  <CreditCard className="h-4 w-4" /> Billing
                 </DropdownMenuItem>
                 <DropdownMenuItem className="gap-2 cursor-pointer">
                   <Bell className="h-4 w-4" /> Notifications
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="gap-2 cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="h-4 w-4" /> Log out

@@ -28,7 +28,6 @@ class Project(Base):
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    system_type = Column(String, default="Solar")
     
     owner = relationship("User")
     sites = relationship("Site", back_populates="project", cascade="all, delete-orphan")

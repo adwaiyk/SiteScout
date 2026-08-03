@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from uuid import UUID
+from datetime import datetime
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -29,6 +30,13 @@ class UserProfile(BaseModel):
 class ProjectCreate(BaseModel):
     name: str
     description: Optional[str] = None
+
+class ProjectResponse(ProjectCreate):
+    id: UUID
+    created_at: Optional[datetime] = None
+    
+    class Config:
+        orm_mode = True
 
 class SiteCreate(BaseModel):
     name: str

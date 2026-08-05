@@ -27,19 +27,28 @@ export default function SignupPage() {
 
     try {
       await axios.post(`${API_URL}/auth/register`, {
-        email,
-        password,
+        email: email,
+        password: password,
         full_name: fullName,
         role: "planner",
+        organization: "Independent", // Add this field to satisfy your backend schema requirements!
       });
       setSuccess("Account created successfully! Redirecting to login...");
       setTimeout(() => {
         window.location.href = "/";
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Registration failed. Email might be in use.");
-    } finally {
-      setIsLoading(false);
+      // Enhanced error handling to show what the backend is actually complaining about
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
+      } else if (err.response?.status === 422) {
+        setError(
+          "Validation Error: Frontend payload fields do not match backend model expectations.",
+        );
+        console.error("Pydantic Validation Logs:", err.response.data);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     }
   };
 
@@ -49,7 +58,8 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-slate-800 flex flex-col justify-end p-10 text-white">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;Empowering field analysts and planners with unified, production-grade spatial intelligence.&rdquo;
+              &ldquo;Empowering field analysts and planners with unified,
+              production-grade spatial intelligence.&rdquo;
             </p>
           </blockquote>
         </div>
@@ -62,9 +72,11 @@ export default function SignupPage() {
             </div>
             SiteScout
           </div>
-          
+
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Create an account
+            </h1>
             <p className="text-sm text-muted-foreground">
               Enter your details below to set up your profile
             </p>
@@ -102,18 +114,29 @@ export default function SignupPage() {
                 required
               />
             </div>
-            
-            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-            {success && <p className="text-sm font-medium text-emerald-500">{success}</p>}
+
+            {error && (
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            )}
+            {success && (
+              <p className="text-sm font-medium text-emerald-500">{success}</p>
+            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Sign Up"}
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
 
           <div className="text-center text-sm">
             Already have an account?{" "}
-            <Link href="/" className="underline underline-offset-4 hover:text-primary">
+            <Link
+              href="/"
+              className="underline underline-offset-4 hover:text-primary"
+            >
               Log in
             </Link>
           </div>

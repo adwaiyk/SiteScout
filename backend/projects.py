@@ -3,8 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import models, schemas, database
 from auth import get_current_user
-from ingestion import fetch_nasa_power_data, fetch_osm_infrastructure
 from geoalchemy2.shape import to_shape
+
+# Import Intelligence Engines
+from ingestion import fetch_nasa_power_data, fetch_osm_infrastructure
+from conflict_detector import detect_land_use_conflicts
+from prediction_engine import predict_solar_potential, predict_wind_potential
 
 router = APIRouter(prefix="/projects", tags=["Project & Site Management"])
 
@@ -47,10 +51,16 @@ def register_site(project_id: str, site: schemas.SiteCreate, db: Session = Depen
     )
     db.add(new_site)
     db.commit()
-    return {"message": f"Site {site.name} registered successfully"}
+    return {"message": f"Site {site.name} registered successfully", "site_id": new_site.id}
 
-@router.get("/{project_id}/sites/{site_id}/data", status_code=status.HTTP_200_OK)
-async def get_site_environmental_data(project_id: str, site_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+@router.post("/{project_id}/sites/{site_id}/analyze", status_code=status.HTTP_200_OK)
+async def analyze_and_save_site(
+    project_id: str, 
+    site_id: str, 
+    system_capacity_kw: float = 1000.0,
+    db: Session = Depends(database.get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
     # 1. Verify ownership
     project = db.query(models.Project).filter(models.Project.id == project_id, models.Project.owner_id == current_user.id).first()
     if not project:
@@ -64,15 +74,48 @@ async def get_site_environmental_data(project_id: str, site_id: str, db: Session
     point = to_shape(site.coordinates)
     longitude, latitude = point.x, point.y
 
-    # 3. Fetch from NASA and OSM simultaneously!
-    nasa_data, osm_data = await asyncio.gather(
+    # 3. Fetch from all intelligence APIs simultaneously!
+    nasa_data, osm_data, conflict_data = await asyncio.gather(
         fetch_nasa_power_data(latitude=latitude, longitude=longitude),
-        fetch_osm_infrastructure(latitude=latitude, longitude=longitude)
+        fetch_osm_infrastructure(latitude=latitude, longitude=longitude),
+        detect_land_use_conflicts(lat=latitude, lon=longitude)
     )
     
-    return {
+    # 4. Generate Machine Learning Predictions
+    solar_prediction = predict_solar_potential(
+        irradiance_kwh_m2_day=nasa_data.get("annual_solar_irradiance_kwh_m2_day", 0),
+        avg_temp_c=nasa_data.get("annual_avg_temp_c", 25),
+        system_capacity_kw=system_capacity_kw
+    )
+    
+    wind_prediction = predict_wind_potential(
+        wind_speed_m_s=nasa_data.get("annual_wind_speed_50m_m_s", 0),
+        system_capacity_kw=system_capacity_kw
+    )
+    
+    # 5. Compile Master JSON
+    full_analysis = {
         "site_name": site.name,
         "coordinates": {"latitude": latitude, "longitude": longitude},
         "environmental_baseline": nasa_data,
-        "infrastructure_baseline": osm_data
+        "infrastructure_baseline": osm_data,
+        "land_use_conflicts": conflict_data,
+        "predictions": {
+            "solar": solar_prediction,
+            "wind": wind_prediction
+        }
     }
+    
+    # 6. Save Scan Log to Database
+    scan_log = models.ScanLog(
+        site_id=site.id,
+        solar_yield_mwh=solar_prediction.get("annual_energy_output_mwh"),
+        wind_yield_mwh=wind_prediction.get("annual_energy_output_mwh"),
+        is_unsuitable=conflict_data.get("is_unsuitable", False),
+        full_analysis_json=full_analysis
+    )
+    
+    db.add(scan_log)
+    db.commit()
+
+    return full_analysis

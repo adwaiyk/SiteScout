@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Numeric, Text
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Numeric, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
@@ -28,8 +28,10 @@ class Project(Base):
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    system_type = Column(String, default="Solar")
     
     owner = relationship("User")
+    sites = relationship("Site", back_populates="project", cascade="all, delete-orphan")
 
 class Site(Base):
     __tablename__ = "sites"
@@ -45,4 +47,18 @@ class Site(Base):
     land_ownership = Column(String(100))
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    project = relationship("Project")
+    project = relationship("Project", back_populates="sites")
+    logs = relationship("ScanLog", back_populates="site", cascade="all, delete-orphan")
+
+class ScanLog(Base):
+    __tablename__ = "scan_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    site_id = Column(UUID(as_uuid=True), ForeignKey("sites.id", ondelete="CASCADE"))
+    solar_yield_mwh = Column(Numeric, nullable=True)
+    wind_yield_mwh = Column(Numeric, nullable=True)
+    is_unsuitable = Column(Boolean, default=False)
+    full_analysis_json = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    site = relationship("Site", back_populates="logs")

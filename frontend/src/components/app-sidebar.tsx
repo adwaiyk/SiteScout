@@ -56,7 +56,7 @@ export function AppSidebar() {
   });
 
   useEffect(() => {
-    // 1. Optimistic load from localStorage
+    
     const storedName = localStorage.getItem("userName");
     const storedEmail = localStorage.getItem("userEmail");
 
@@ -76,7 +76,6 @@ export function AppSidebar() {
       });
     }
 
-    // 2. Sync background profile from API
     const fetchUserProfile = async () => {
       try {
         const response = await api.get("/auth/me");
@@ -110,7 +109,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="inset" className="border-r border-border bg-sidebar text-sidebar-foreground">
-      {/* HEADER */}
+      {}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -129,7 +128,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* PLATFORM GROUP */}
+        {}
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -144,7 +143,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* DASHBOARDS GROUP */}
+        {}
         <SidebarGroup>
           <SidebarGroupLabel>Dashboards</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -165,7 +164,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* TOOLS & REPORTS GROUP */}
+        {}
         <SidebarGroup>
           <SidebarGroupLabel>Tools &amp; Reports</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -186,10 +185,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
       </SidebarContent>
 
-      {/* FOOTER */}
+      {}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

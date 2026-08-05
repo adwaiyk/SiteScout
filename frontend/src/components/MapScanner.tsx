@@ -13,8 +13,6 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// ---------- Leaflet Icon Fix ----------
-
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
@@ -23,7 +21,6 @@ const defaultIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-// Color-coded markers for analysis results
 function createColorIcon(color: string) {
   return new L.DivIcon({
     className: "custom-marker",
@@ -45,8 +42,6 @@ const RESULT_ICONS = {
   unsuitable: createColorIcon("#ef4444"),
 };
 
-// ---------- Types ----------
-
 interface SiteMarker {
   id: string;
   position: [number, number];
@@ -61,8 +56,6 @@ interface MapScannerProps {
   zoom?: number;
   siteMarkers?: SiteMarker[];
 }
-
-// ---------- Map Click Handler ----------
 
 function LocationMarker({
   onLocationSelect,
@@ -90,8 +83,6 @@ function LocationMarker({
     </Marker>
   );
 }
-
-// ---------- Layer Control Panel ----------
 
 function LayerControlPanel({
   showSolar,
@@ -144,8 +135,6 @@ function LayerControlPanel({
   );
 }
 
-// ---------- Coordinate Display ----------
-
 function CoordinateDisplay({ pos }: { pos: [number, number] | null }) {
   if (!pos) return null;
   return (
@@ -160,8 +149,6 @@ function CoordinateDisplay({ pos }: { pos: [number, number] | null }) {
   );
 }
 
-// ---------- Main Component ----------
-
 export default function MapScanner({
   onLocationSelect,
   selectedPos,
@@ -173,12 +160,11 @@ export default function MapScanner({
   const [showWind, setShowWind] = useState(false);
   const [showInfra, setShowInfra] = useState(true);
 
-  // Default centered on Maharashtra, India
   const mapCenter: [number, number] = center || [19.7515, 75.7139];
 
   return (
     <div className="relative h-[560px] w-full rounded-lg overflow-hidden border border-border">
-      {/* Layer control panel */}
+      {}
       <LayerControlPanel
         showSolar={showSolar}
         setShowSolar={setShowSolar}
@@ -188,7 +174,7 @@ export default function MapScanner({
         setShowInfra={setShowInfra}
       />
 
-      {/* Coordinate readout */}
+      {}
       <CoordinateDisplay pos={selectedPos} />
 
       <MapContainer
@@ -198,9 +184,9 @@ export default function MapScanner({
         className="h-full w-full"
         zoomControl={true}
       >
-        {/* Base Layer Control */}
+        {}
         <LayersControl position="bottomright">
-          {/* Base Layers (Mutually Exclusive) */}
+          {}
           <LayersControl.BaseLayer checked name="Streets">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -223,7 +209,7 @@ export default function MapScanner({
           </LayersControl.BaseLayer>
         </LayersControl>
 
-        {/* Infrastructure Overlay — Transport network via transparent OSM layer */}
+        {}
         {showInfra && (
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -231,13 +217,13 @@ export default function MapScanner({
           />
         )}
 
-        {/* Click handler & selected marker */}
+        {}
         <LocationMarker
           onLocationSelect={onLocationSelect}
           selectedPos={selectedPos}
         />
 
-        {/* Analysis buffer radius around selected point */}
+        {}
         {selectedPos && (
           <Circle
             center={selectedPos}
@@ -252,7 +238,7 @@ export default function MapScanner({
           />
         )}
 
-        {/* Site result markers */}
+        {}
         {siteMarkers.map((marker) => (
           <Marker
             key={marker.id}

@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * SiteScout — Theme Context
- *
- * Provides dark / light mode toggle with:
- *  - localStorage persistence across sessions
- *  - SSR-safe initialization (suppresses hydration mismatch)
- *  - Default: dark mode for first-time visitors
- */
-
 import React, {
   createContext,
   useContext,
@@ -31,11 +22,10 @@ const STORAGE_KEY = "sitescout-theme";
 const DEFAULT_THEME: Theme = "dark";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Start with default to avoid SSR mismatch — real value applied in useEffect
+  
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
   const [mounted, setMounted] = useState(false);
 
-  // On mount: read stored preference or system preference
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     let resolved: Theme;
@@ -55,7 +45,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Sync theme class to <html> whenever theme changes
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement;

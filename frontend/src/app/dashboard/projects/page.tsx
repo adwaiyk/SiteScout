@@ -18,8 +18,6 @@ import {
   Tag,
 } from "lucide-react";
 
-// ---------- Sector badge ----------
-
 const SECTOR_LABELS: Record<string, { label: string; color: string }> = {
   solar_pv: { label: "Solar PV", color: "bg-amber-500/15 text-amber-500 border-amber-500/20" },
   wind_energy: { label: "Wind", color: "bg-cyan-500/15 text-cyan-500 border-cyan-500/20" },
@@ -37,8 +35,6 @@ function SectorBadge({ sector }: { sector: string }) {
     </span>
   );
 }
-
-// ---------- Main Component ----------
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -64,7 +60,7 @@ export default function ProjectsPage() {
 
   const handleProjectCreated = (projectId: string, config: ProjectWizardData) => {
     setWizardOpen(false);
-    // Navigate to dashboard which will auto-select the new project
+    
     router.push("/dashboard");
   };
 
@@ -108,7 +104,7 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project: any) => {
-            // Load config from localStorage for sector badge
+            
             let config: ProjectWizardData | null = null;
             try {
               const stored = localStorage.getItem(`project_config_${project.id}`);
@@ -165,7 +161,7 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* Wizard Modal */}
+      {}
       <ProjectWizardModal
         open={wizardOpen}
         onOpenChange={setWizardOpen}

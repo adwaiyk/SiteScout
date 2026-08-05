@@ -20,8 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning prevents React mismatch when ThemeProvider
-    // applies the theme class on the client after SSR.
+
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>

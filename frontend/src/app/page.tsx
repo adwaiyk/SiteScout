@@ -65,10 +65,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated background */}
+      {}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-blue-950/20 pointer-events-none" />
       
-      {/* Grid pattern */}
+      {}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -77,7 +77,7 @@ export default function LandingPage() {
         }}
       />
 
-      {/* Floating glow orbs */}
+      {}
       <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-blue-500/8 blur-[150px] animate-pulse pointer-events-none" />
       <div
         className="absolute bottom-1/3 right-1/4 h-64 w-64 rounded-full bg-indigo-500/8 blur-[120px] animate-pulse pointer-events-none"
@@ -88,16 +88,16 @@ export default function LandingPage() {
         style={{ animationDelay: "4s" }}
       />
 
-      {/* Hero */}
+      {}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6 text-center">
         <div className="max-w-4xl mx-auto space-y-12">
-          {/* Badge */}
+          {}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
             <Zap className="h-3.5 w-3.5" />
             SiteScout
           </div>
 
-          {/* Title */}
+          {}
           <div className="space-y-6">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight">
               Deploy Renewables{" "}
@@ -111,7 +111,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* CTAs */}
+          {}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="h-13 px-8 text-base font-medium shadow-xl shadow-primary/20">
               <Link href="/signup">
@@ -124,7 +124,7 @@ export default function LandingPage() {
             </Button>
           </div>
 
-          {/* Feature cards */}
+          {}
           <div className="grid sm:grid-cols-3 gap-4 pt-8 max-w-3xl mx-auto">
             {FEATURES.map((feat, i) => (
               <div

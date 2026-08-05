@@ -35,18 +35,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Hydrate auth state on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // Load cached user data immediately for fast UI
+      
       const cachedName = localStorage.getItem("userName");
       const cachedEmail = localStorage.getItem("userEmail");
       if (cachedName && cachedEmail) {
         setUser({ name: cachedName, email: cachedEmail });
       }
 
-      // Then validate token + fetch fresh profile in background
       api
         .get("/auth/me")
         .then((res) => {
@@ -61,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("userEmail", freshUser.email);
         })
         .catch(() => {
-          // Token is invalid — clear everything
+          
           localStorage.removeItem("token");
           localStorage.removeItem("userName");
           localStorage.removeItem("userEmail");
@@ -120,7 +118,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: userEmail || data.email,
       });
 
-      // New users go to onboarding, not dashboard
       router.replace("/onboarding");
     },
     [router]

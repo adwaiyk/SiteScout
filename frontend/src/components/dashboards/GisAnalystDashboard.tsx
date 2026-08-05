@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * SiteScout â€” GIS Analyst Dashboard
- *
- * Targeted at spatial engineers and environmental analysts.
- * Three primary intelligence panels:
- *   1. Interactive What-If Weight Adjuster (live-recomputing sliders)
- *   2. Grid Hosting Capacity Inspector
- *   3. Land-Use Conflict Indicator (badge system)
- */
-
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   BarChart,
@@ -35,10 +25,6 @@ import {
   CircleGauge,
 } from "lucide-react";
 import api from "@/lib/api";
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TYPES
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 interface Project {
   id: string;
@@ -83,10 +69,6 @@ interface ConflictData {
   floodplain_overlap?: boolean;
   water_body_overlap?: boolean;
 }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   WEIGHT SLIDER CONFIG
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 interface WeightConfig {
   key: string;
@@ -141,10 +123,6 @@ const WEIGHT_FACTORS: WeightConfig[] = [
   },
 ];
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   CLASSIFICATION STYLING
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
 const CLASSIFICATION_STYLES: Record<string, string> = {
   Excellent: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   "Highly Suitable": "bg-blue-500/15 text-blue-400 border-blue-500/30",
@@ -159,51 +137,36 @@ const HOSTING_STATUS_STYLES: Record<string, { className: string; icon: typeof Sh
   Constrained: { className: "bg-red-500/15 text-red-400 border-red-500/30", icon: ShieldAlert },
 };
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   COMPONENT
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
 export default function GisAnalystDashboard() {
-  // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Weights
   const [weights, setWeights] = useState<Record<string, number>>(
     Object.fromEntries(WEIGHT_FACTORS.map((f) => [f.key, f.defaultWeight]))
   );
 
-  // Scored sites
   const [scoredSites, setScoredSites] = useState<ScoredSite[]>([]);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
 
-  // Grid capacity
   const [gridCapacity, setGridCapacity] = useState<GridCapacity | null>(null);
   const [gridLoading, setGridLoading] = useState(false);
 
-  // Conflict data (from the scored site's analysis)
   const [conflictData, setConflictData] = useState<ConflictData | null>(null);
 
-  // Debounce ref for live-recompute
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Ref mirror of selectedProjectId so debounce callbacks always read the
-  // latest value without needing to be recreated on every project change.
   const projectIdRef = useRef<string>("");
   useEffect(() => {
     projectIdRef.current = selectedProjectId;
   }, [selectedProjectId]);
 
-  // -- Fetch projects -------------------------------------------------------
   useEffect(() => {
     api.get("/projects/").then((res) => setProjects(res.data)).catch(console.error);
   }, []);
 
-  // -- Score sites with current weights ------------------------------------
-  // Accepts an explicit projectId so it can be called from the debounce
-  // callback and the project-change effect without stale closure issues.
   const scoreSites = useCallback(
     async (projectId: string, w: Record<string, number>) => {
       if (!projectId) return;
@@ -224,7 +187,6 @@ export default function GisAnalystDashboard() {
         );
         setScoredSites(res.data.scored_sites || []);
 
-        // Auto-select first site only on initial load (no site selected yet)
         if (res.data.scored_sites?.length > 0) {
           setSelectedSiteId((prev) =>
             prev ? prev : res.data.scored_sites[0].site_id
@@ -236,31 +198,25 @@ export default function GisAnalystDashboard() {
         setLoading(false);
       }
     },
-    [] // No state dependencies -- projectId is passed explicitly
+    [] 
   );
 
-  // -- Initial load on project select -------------------------------------
   useEffect(() => {
     if (selectedProjectId) {
       setSelectedSiteId(null);
       setGridCapacity(null);
       setConflictData(null);
-      // Pass selectedProjectId explicitly -- safe because this effect runs
-      // synchronously after the state update, not inside a debounce callback.
+
       scoreSites(selectedProjectId, weights);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [selectedProjectId]);
 
-  // -- Handle weight change (with debounced live-recompute) ---------------
-  // Uses projectIdRef instead of closing over scoreSites or selectedProjectId,
-  // so the debounce callback always has the latest project and weights.
   const handleWeightChange = useCallback(
     (key: string, newValue: number) => {
       setWeights((prev) => {
         const updated = { ...prev, [key]: newValue };
 
-        // Auto-normalize: adjust other weights proportionally to maintain sum=1
         const otherKeys = WEIGHT_FACTORS.filter((f) => f.key !== key).map((f) => f.key);
         const otherSum = otherKeys.reduce((sum, k) => sum + prev[k], 0);
         const remaining = Math.max(0, 1.0 - newValue);
@@ -270,16 +226,13 @@ export default function GisAnalystDashboard() {
             updated[k] = (prev[k] / otherSum) * remaining;
           }
         } else {
-          // If all others were 0, distribute equally
+          
           const equalShare = remaining / otherKeys.length;
           for (const k of otherKeys) {
             updated[k] = equalShare;
           }
         }
 
-        // Debounced API call.
-        // Read projectId from the ref so this callback never goes stale
-        // even after rapid weight changes or project switches.
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(() => {
           const currentProjectId = projectIdRef.current;
@@ -294,7 +247,6 @@ export default function GisAnalystDashboard() {
     [scoreSites]
   );
 
-  // â”€â”€ Fetch grid capacity when site is selected â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!selectedProjectId || !selectedSiteId) return;
 
@@ -310,14 +262,12 @@ export default function GisAnalystDashboard() {
       })
       .finally(() => setGridLoading(false));
 
-    // Also try to fetch conflict data from the explain-site endpoint data
-    // For now we'll extract from the scored site's known data
     const site = scoredSites.find((s) => s.site_id === selectedSiteId);
     if (site) {
       const envBreakdown = site.factor_breakdown.find(
         (f) => f.factor_name === "Environmental Impact"
       );
-      // Heuristic: map normalized environmental score to conflict indicators
+      
       if (envBreakdown) {
         const envScore = envBreakdown.normalized_value;
         setConflictData({
@@ -332,7 +282,6 @@ export default function GisAnalystDashboard() {
     }
   }, [selectedSiteId, selectedProjectId]);
 
-  // â”€â”€ Bar chart data for the selected site's factor breakdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const breakdownChartData = useMemo(() => {
     const site = scoredSites.find((s) => s.site_id === selectedSiteId);
     if (!site) return [];
@@ -349,13 +298,9 @@ export default function GisAnalystDashboard() {
   const selectedSiteName =
     scoredSites.find((s) => s.site_id === selectedSiteId)?.site_name || "â€”";
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  // RENDER
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto min-h-[calc(100vh-3.5rem)]">
-      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
@@ -384,7 +329,7 @@ export default function GisAnalystDashboard() {
         </div>
       </header>
 
-      {/* â”€â”€ Error Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {}
       {error && (
         <div className="flex items-center gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -392,7 +337,7 @@ export default function GisAnalystDashboard() {
         </div>
       )}
 
-      {/* â”€â”€ Empty State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {}
       {!selectedProjectId && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4">
@@ -408,10 +353,10 @@ export default function GisAnalystDashboard() {
         </div>
       )}
 
-      {/* â”€â”€ Main Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {}
       {selectedProjectId && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* â•â•â•â•â•â•â• Panel 1: What-If Weight Adjuster (left column) â•â•â•â•â•â•â• */}
+          {}
           <div className="xl:col-span-1 space-y-6">
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="mb-4">
@@ -464,7 +409,7 @@ export default function GisAnalystDashboard() {
                 })}
               </div>
 
-              {/* Weight sum indicator */}
+              {}
               <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground">
                 <span>Total</span>
                 <span className="font-mono font-semibold text-foreground">
@@ -476,7 +421,7 @@ export default function GisAnalystDashboard() {
               </div>
             </div>
 
-            {/* â•â•â•â•â•â•â• Panel 3: Land-Use Conflict Indicator â•â•â•â•â•â•â• */}
+            {}
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -498,7 +443,7 @@ export default function GisAnalystDashboard() {
 
               {selectedSiteId && conflictData && (
                 <div className="space-y-3">
-                  {/* Overall status */}
+                  {}
                   <div
                     className={`rounded-lg border p-3 text-sm font-medium ${
                       conflictData.is_unsuitable
@@ -515,7 +460,7 @@ export default function GisAnalystDashboard() {
                         : "âœ“ Clear for Feasibility"}
                   </div>
 
-                  {/* Badge grid */}
+                  {}
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       {
@@ -562,9 +507,9 @@ export default function GisAnalystDashboard() {
             </div>
           </div>
 
-          {/* â•â•â•â•â•â•â• Panel 2: Site Rankings + Grid Capacity (right columns) â•â•â•â•â•â•â• */}
+          {}
           <div className="xl:col-span-2 space-y-6">
-            {/* Scored Sites Table */}
+            {}
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -659,7 +604,7 @@ export default function GisAnalystDashboard() {
               )}
             </div>
 
-            {/* Factor Breakdown Chart for Selected Site */}
+            {}
             {selectedSiteId && breakdownChartData.length > 0 && (
               <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                 <div className="mb-4">
@@ -732,7 +677,7 @@ export default function GisAnalystDashboard() {
               </div>
             )}
 
-            {/* â•â•â•â•â•â•â• Grid Hosting Capacity Inspector â•â•â•â•â•â•â• */}
+            {}
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -763,7 +708,7 @@ export default function GisAnalystDashboard() {
 
               {!gridLoading && gridCapacity && (
                 <div className="space-y-4">
-                  {/* Status Badge */}
+                  {}
                   <div className="flex items-center gap-3">
                     {(() => {
                       const style =
@@ -787,7 +732,7 @@ export default function GisAnalystDashboard() {
                     </span>
                   </div>
 
-                  {/* Metrics Grid */}
+                  {}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {[
                       {
@@ -831,7 +776,7 @@ export default function GisAnalystDashboard() {
                     ))}
                   </div>
 
-                  {/* Assessment notes */}
+                  {}
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-accent/30 border border-border text-xs text-muted-foreground">
                     <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-blue-400" />
                     <p>{gridCapacity.assessment_notes}</p>

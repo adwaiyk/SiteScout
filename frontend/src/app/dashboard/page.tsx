@@ -27,8 +27,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-// ---------- Types ----------
-
 interface Project {
   id: string;
   name: string;
@@ -37,7 +35,6 @@ interface Project {
   created_at?: string;
 }
 
-// Region center coordinates for map pre-focus
 const REGION_CENTERS: Record<string, [number, number]> = {
   "Maharashtra, India": [19.7515, 75.7139],
   "Rajasthan, India": [27.0238, 74.2179],
@@ -51,7 +48,6 @@ const REGION_CENTERS: Record<string, [number, number]> = {
   "Punjab, India": [31.1471, 75.3412],
 };
 
-// Dynamically import map with SSR disabled
 const MapScanner = dynamic(() => import("@/components/MapScanner"), {
   ssr: false,
   loading: () => (
@@ -61,8 +57,6 @@ const MapScanner = dynamic(() => import("@/components/MapScanner"), {
     </div>
   ),
 });
-
-// ---------- Sector badge helper ----------
 
 const SECTOR_LABELS: Record<string, { label: string; color: string }> = {
   solar_pv: { label: "Solar PV", color: "bg-amber-500/15 text-amber-500 border-amber-500/20" },
@@ -82,23 +76,18 @@ function SectorBadge({ sector }: { sector: string }) {
   );
 }
 
-// ---------- Main Component ----------
-
 export default function DashboardPage() {
-  // Project state
+  
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activeConfig, setActiveConfig] = useState<ProjectWizardData | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  // Map / analysis state
   const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(null);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // ---------- Fetch projects ----------
 
   const fetchProjects = useCallback(async () => {
     setProjectsLoading(true);
@@ -116,15 +105,12 @@ export default function DashboardPage() {
     fetchProjects();
   }, [fetchProjects]);
 
-  // ---------- Select project ----------
-
   const handleSelectProject = (project: Project) => {
     setActiveProject(project);
     setAnalysis(null);
     setSelectedCoords(null);
     setError(null);
 
-    // Load wizard config from localStorage
     const stored = localStorage.getItem(`project_config_${project.id}`);
     if (stored) {
       try {
@@ -137,11 +123,9 @@ export default function DashboardPage() {
     }
   };
 
-  // ---------- Wizard callback ----------
-
   const handleProjectCreated = (projectId: string, config: ProjectWizardData) => {
     setWizardOpen(false);
-    // Refresh project list and auto-select the new project
+    
     fetchProjects().then(() => {
       const newProject: Project = {
         id: projectId,
@@ -152,8 +136,6 @@ export default function DashboardPage() {
       setActiveConfig(config);
     });
   };
-
-  // ---------- Map click handler ----------
 
   const handleLocationSelect = async (lat: number, lon: number) => {
     if (!activeProject) return;
@@ -174,8 +156,6 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
-
-  // ---------- Save site to project ----------
 
   const handleSaveSite = async () => {
     if (!activeProject || !selectedCoords || !analysis) return;
@@ -198,7 +178,7 @@ export default function DashboardPage() {
       );
 
       setError(null);
-      // Brief success feedback
+      
       alert("Site saved and analyzed successfully.");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Error saving site.");
@@ -207,20 +187,14 @@ export default function DashboardPage() {
     }
   };
 
-  // ---------- Map center from config ----------
-
   const mapCenter: [number, number] | undefined =
     activeConfig?.targetRegion
       ? REGION_CENTERS[activeConfig.targetRegion]
       : undefined;
 
-  // ================================================================
-  // RENDER
-  // ================================================================
-
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-[1600px] mx-auto bg-background min-h-[calc(100vh-3.5rem)]">
-      {/* ===== STATE A: No Active Project — Project Hub ===== */}
+      {}
       {!activeProject && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <header className="flex items-center justify-between">
@@ -238,7 +212,7 @@ export default function DashboardPage() {
             </Button>
           </header>
 
-          {/* Loading */}
+          {}
           {projectsLoading && (
             <div className="flex items-center justify-center p-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-3" />
@@ -246,7 +220,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Empty state */}
+          {}
           {!projectsLoading && projects.length === 0 && (
             <div className="text-center p-16 border-2 border-dashed border-border rounded-xl bg-card/30">
               <FolderKanban className="mx-auto h-14 w-14 text-muted-foreground/40 mb-5" />
@@ -261,11 +235,11 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Project cards */}
+          {}
           {!projectsLoading && projects.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project: any) => {
-                // Try to load config from localStorage for sector badge
+                
                 let config: ProjectWizardData | null = null;
                 try {
                   const stored = localStorage.getItem(`project_config_${project.id}`);
@@ -318,10 +292,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ===== STATE B: Active Project — Map View ===== */}
+      {}
       {activeProject && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Project header bar */}
+          {}
           <header className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-4">
               <Button
@@ -379,7 +353,7 @@ export default function DashboardPage() {
             )}
           </header>
 
-          {/* Map Canvas */}
+          {}
           <div className="relative z-0 rounded-lg border border-border bg-card p-1 shadow-sm">
             <MapScanner
               onLocationSelect={handleLocationSelect}
@@ -389,7 +363,7 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Loading State */}
+          {}
           {loading && (
             <div className="flex items-center justify-center p-6 border border-border rounded-lg bg-muted/40 text-muted-foreground text-sm shadow-sm">
               <Loader2 className="mr-3 h-4 w-4 animate-spin" />
@@ -397,18 +371,18 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Error Alert */}
+          {}
           {error && (
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm font-medium">
               {error}
             </div>
           )}
 
-          {/* Results Grid */}
+          {}
           {analysis && !loading && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-in-out">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Solar Analytics */}
+                {}
                 <Card className="shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -438,7 +412,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                {/* Wind Analytics */}
+                {}
                 <Card className="shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -468,7 +442,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                {/* Infrastructure Proximity */}
+                {}
                 <Card className="shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -500,7 +474,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                {/* Conflict Detector */}
+                {}
                 <Card
                   className={`shadow-sm ${
                     analysis.land_use_conflicts.is_unsuitable
@@ -548,7 +522,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Wizard Modal */}
+      {}
       <ProjectWizardModal
         open={wizardOpen}
         onOpenChange={setWizardOpen}

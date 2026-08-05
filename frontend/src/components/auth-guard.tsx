@@ -9,11 +9,6 @@ interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-/**
- * Route protection wrapper. Redirects unauthenticated users to /login.
- * Shows a loading skeleton while auth state is being hydrated to prevent
- * unauthenticated flash of protected content.
- */
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();

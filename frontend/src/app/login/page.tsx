@@ -23,7 +23,6 @@ export default function LoginPage() {
     setMounted(true);
   }, []);
 
-  // If the user is already logged in, redirect them immediately to the dashboard
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       router.replace("/dashboard");
@@ -44,7 +43,6 @@ export default function LoginPage() {
     }
   };
 
-  // Don't render until mounted (prevents hydration mismatch)
   if (!mounted || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -57,13 +55,13 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Left: Form Panel */}
+      {}
       <div className="flex flex-col gap-4 p-6 md:p-10 justify-center items-center relative overflow-hidden">
-        {/* Subtle background gradient */}
+        {}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 pointer-events-none" />
         
         <div className="w-full max-w-sm space-y-6 relative z-10">
-          {/* Brand */}
+          {}
           <div className="flex items-center gap-2.5 font-semibold text-lg">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25">
               <GalleryVerticalEnd className="size-4" />
@@ -146,25 +144,25 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right: Animated Hero Panel */}
+      {}
       <div className="relative hidden bg-muted lg:block overflow-hidden">
-        {/* Gradient background */}
+        {}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950" />
         
-        {/* Animated grid pattern */}
+        {}
         <div className="absolute inset-0 opacity-[0.07]" style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
           backgroundSize: '60px 60px',
         }} />
         
-        {/* Floating glow orbs */}
+        {}
         <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-blue-500/20 blur-[100px] animate-pulse" />
         <div className="absolute bottom-1/3 right-1/4 h-48 w-48 rounded-full bg-indigo-500/20 blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 right-1/3 h-32 w-32 rounded-full bg-cyan-500/15 blur-[60px] animate-pulse" style={{ animationDelay: '2s' }} />
         
-        {/* Content overlay */}
+        {}
         <div className="absolute inset-0 flex flex-col justify-between p-10 text-white">
-          {/* Feature cards */}
+          {}
           <div className="flex-1 flex flex-col justify-center space-y-6">
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tight">Spatial Intelligence,<br />Redefined.</h2>
@@ -173,7 +171,7 @@ export default function LoginPage() {
               </p>
             </div>
             
-            {/* Mini feature highlights */}
+            {}
             <div className="space-y-3 max-w-sm">
               {[
                 { icon: Globe2, label: "GIS-Powered Site Scanning", desc: "NASA climate + infrastructure data" },
@@ -197,7 +195,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Testimonial */}
+          {}
           <blockquote className="space-y-2 border-t border-white/10 pt-6">
             <p className="text-sm text-slate-400 leading-relaxed">
               &ldquo;SiteScout optimizes our deployment selection pipeline, bringing multi-objective frontier intelligence to core planning processes.&rdquo;

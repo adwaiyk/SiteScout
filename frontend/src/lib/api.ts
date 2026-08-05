@@ -1,14 +1,12 @@
 import axios from 'axios';
 
-// Create a configured Axios instance
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000', // Your FastAPI backend
+  baseURL: 'http://127.0.0.1:8000', 
 });
 
-// 1. REQUEST INTERCEPTOR: Automatically attach the token to every outgoing request
 api.interceptors.request.use(
   (config) => {
-    // Only run on the client side
+    
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
@@ -20,20 +18,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 2. RESPONSE INTERCEPTOR: Globally catch 401 errors and force logout
 api.interceptors.response.use(
-  (response) => response, // If the response is good, just pass it through
+  (response) => response, 
   (error) => {
     if (error.response && error.response.status === 401) {
       console.warn("Session expired. Logging out...");
       
       if (typeof window !== 'undefined') {
-        // Erase the dead token and all cached user data
+        
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
         localStorage.removeItem('userEmail');
-        
-        // Redirect back to login
+
         window.location.replace('/login');
       }
     }

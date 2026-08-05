@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * SiteScout — Planner Dashboard
- *
- * Targeted at renewable energy planners and investment managers.
- * Three primary intelligence panels:
- *   1. Pareto Frontier Trade-Off Chart (scatter)
- *   2. SHAP Feature Explanation Panel (waterfall bars)
- *   3. Energy Forecasting Chart (area with P10/P50/P90 bands)
- */
-
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ScatterChart,
@@ -38,10 +28,6 @@ import {
   Info,
 } from "lucide-react";
 import api from "@/lib/api";
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   TYPES
-   ═══════════════════════════════════════════════════════════════════════ */
 
 interface Project {
   id: string;
@@ -98,18 +84,13 @@ interface ForecastData {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT
-   ═══════════════════════════════════════════════════════════════════════ */
-
 export default function PlannerDashboard() {
-  // ── State ─────────────────────────────────────────────────────────────
+  
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Panel data
   const [paretoSolutions, setParetoSolutions] = useState<ParetoSolution[]>([]);
   const [dominatedSolutions, setDominatedSolutions] = useState<ParetoSolution[]>([]);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
@@ -118,19 +99,14 @@ export default function PlannerDashboard() {
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [forecastLoading, setForecastLoading] = useState(false);
 
-  // ── Fetch projects ────────────────────────────────────────────────────
   useEffect(() => {
     api.get("/projects/").then((res) => setProjects(res.data)).catch(console.error);
   }, []);
 
-  // ── Internal helper: fetch SHAP + Forecast for a site ────────────────
-  // Takes explicit projectId to avoid stale closures when called from
-  // runOptimization immediately after state updates.
   const fetchSiteIntelligence = useCallback(
     async (projectId: string, siteId: string) => {
       if (!projectId || !siteId) return;
 
-      // Fetch SHAP explanation
       setShapLoading(true);
       try {
         const shapRes = await api.post(
@@ -145,7 +121,6 @@ export default function PlannerDashboard() {
         setShapLoading(false);
       }
 
-      // Fetch energy forecast
       setForecastLoading(true);
       try {
         const fcRes = await api.post(
@@ -160,15 +135,12 @@ export default function PlannerDashboard() {
         setForecastLoading(false);
       }
     },
-    [] // No state dependencies — projectId and siteId are passed explicitly
+    [] 
   );
 
-  // ── Run Pareto Optimization ───────────────────────────────────────────
   const runOptimization = useCallback(async () => {
     if (!selectedProjectId) return;
 
-    // Capture project ID at call time — avoids stale closure if user
-    // switches projects while optimization is in flight.
     const projectId = selectedProjectId;
 
     setLoading(true);
@@ -190,9 +162,6 @@ export default function PlannerDashboard() {
       setParetoSolutions(pareto);
       setDominatedSolutions(dominated);
 
-      // Auto-select first Pareto solution.
-      // Use the locally captured projectId (not from state) and call the
-      // explicit-param helper to avoid stale-closure issues.
       if (pareto.length > 0) {
         const firstSiteId = pareto[0].site_id;
         setSelectedSiteId(firstSiteId);
@@ -205,11 +174,9 @@ export default function PlannerDashboard() {
     }
   }, [selectedProjectId, fetchSiteIntelligence]);
 
-  // ── Select a site → load SHAP + Forecast ──────────────────────────────
-  // Called when user clicks a point on the Pareto scatter chart.
   const handleSiteSelect = useCallback(
     async (siteId: string) => {
-      // Capture current project ID at call time to prevent stale reads
+      
       const projectId = selectedProjectId;
       if (!projectId) return;
 
@@ -217,13 +184,11 @@ export default function PlannerDashboard() {
       setShapExplanation(null);
       setForecastData(null);
 
-      // Delegate to the explicit-param helper
       fetchSiteIntelligence(projectId, siteId);
     },
     [selectedProjectId, fetchSiteIntelligence]
   );
 
-  // ── Chart data transforms ─────────────────────────────────────────────
   const scatterData = useMemo(() => {
     const all = [
       ...paretoSolutions.map((s) => ({ ...s, is_dominated: false })),
@@ -262,19 +227,14 @@ export default function PlannerDashboard() {
     }));
   }, [forecastData]);
 
-  // ── Lookups ───────────────────────────────────────────────────────────
   const selectedSiteName = useMemo(() => {
     const all = [...paretoSolutions, ...dominatedSolutions];
     return all.find((s) => s.site_id === selectedSiteId)?.site_name || "—";
   }, [paretoSolutions, dominatedSolutions, selectedSiteId]);
 
-  // ═════════════════════════════════════════════════════════════════════
-  // RENDER
-  // ═════════════════════════════════════════════════════════════════════
-
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto min-h-[calc(100vh-3.5rem)]">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
@@ -316,7 +276,7 @@ export default function PlannerDashboard() {
         </div>
       </header>
 
-      {/* ── Error Banner ───────────────────────────────────────────────── */}
+      {}
       {error && (
         <div className="flex items-center gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -324,7 +284,7 @@ export default function PlannerDashboard() {
         </div>
       )}
 
-      {/* ── Empty State ────────────────────────────────────────────────── */}
+      {}
       {!loading && paretoSolutions.length === 0 && dominatedSolutions.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-4">
@@ -340,10 +300,10 @@ export default function PlannerDashboard() {
         </div>
       )}
 
-      {/* ── Dashboard Panels ───────────────────────────────────────────── */}
+      {}
       {(paretoSolutions.length > 0 || dominatedSolutions.length > 0) && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* ═══════ Panel 1: Pareto Frontier Scatter ═══════ */}
+          {}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -440,7 +400,7 @@ export default function PlannerDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* ═══════ Panel 2: SHAP Explanation ═══════ */}
+          {}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -470,7 +430,7 @@ export default function PlannerDashboard() {
 
             {!shapLoading && shapExplanation && (
               <div>
-                {/* Model meta */}
+                {}
                 <div className="flex items-center gap-4 mb-3 text-[10px] text-muted-foreground">
                   <span>
                     Model: <span className="text-foreground font-medium">{shapExplanation.model_type}</span>
@@ -543,7 +503,7 @@ export default function PlannerDashboard() {
             )}
           </div>
 
-          {/* ═══════ Panel 3: Energy Forecast P10/P50/P90 ═══════ */}
+          {}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm xl:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -588,7 +548,7 @@ export default function PlannerDashboard() {
 
             {!forecastLoading && forecastData && (
               <div>
-                {/* KPI strip */}
+                {}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
                   {[
                     {
@@ -667,7 +627,7 @@ export default function PlannerDashboard() {
                         );
                       }}
                     />
-                    {/* P90 upper band */}
+                    {}
                     <Area
                       type="monotone"
                       dataKey="p90"
@@ -676,7 +636,7 @@ export default function PlannerDashboard() {
                       fill="url(#forecastBand)"
                       fillOpacity={1}
                     />
-                    {/* P50 center line */}
+                    {}
                     <Area
                       type="monotone"
                       dataKey="p50"
@@ -685,7 +645,7 @@ export default function PlannerDashboard() {
                       fill="none"
                       dot={{ r: 3, fill: "#f59e0b" }}
                     />
-                    {/* P10 lower band */}
+                    {}
                     <Area
                       type="monotone"
                       dataKey="p10"

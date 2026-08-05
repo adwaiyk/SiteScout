@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ---------- Step Data ----------
 const FEATURES = [
   {
     icon: Globe2,
@@ -62,7 +61,6 @@ export default function OnboardingPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  // Skip onboarding if already completed
   useEffect(() => {
     if (mounted && localStorage.getItem("onboarding_complete") === "true") {
       router.replace("/dashboard");
@@ -93,12 +91,12 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background decoration */}
+      {}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/3 pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-blue-500/5 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
 
-      {/* Header */}
+      {}
       <header className="relative z-10 flex items-center justify-between p-6 md:px-10">
         <div className="flex items-center gap-2.5 font-semibold text-lg">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25">
@@ -111,10 +109,10 @@ export default function OnboardingPage() {
         </Button>
       </header>
 
-      {/* Main content */}
+      {}
       <div className="relative z-10 flex flex-col items-center justify-center px-6 pb-12" style={{ minHeight: 'calc(100vh - 80px)' }}>
         <div className="w-full max-w-2xl">
-          {/* Step indicator */}
+          {}
           <div className="flex items-center justify-center gap-2 mb-10">
             {[0, 1, 2].map((s) => (
               <button
@@ -128,10 +126,10 @@ export default function OnboardingPage() {
             ))}
           </div>
 
-          {/* ===== STEP 0: Welcome ===== */}
+          {}
           {step === 0 && (
             <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Animated welcome icon */}
+              {}
               <div className="mx-auto relative">
                 <div className="h-20 w-20 mx-auto rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-600/20">
                   <span className="text-3xl">👋</span>
@@ -162,7 +160,7 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* ===== STEP 1: Feature Tour ===== */}
+          {}
           {step === 1 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="text-center space-y-2">
@@ -203,7 +201,7 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* ===== STEP 2: Get Started CTAs ===== */}
+          {}
           {step === 2 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="text-center space-y-2">
@@ -214,7 +212,7 @@ export default function OnboardingPage() {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                {/* Scan action */}
+                {}
                 <button
                   onClick={handleComplete}
                   className="group relative p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:shadow-xl hover:shadow-black/5 transition-all duration-300 text-left overflow-hidden"
@@ -237,7 +235,7 @@ export default function OnboardingPage() {
                   </div>
                 </button>
 
-                {/* Create project action */}
+                {}
                 <button
                   onClick={handleComplete}
                   className="group relative p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:shadow-xl hover:shadow-black/5 transition-all duration-300 text-left overflow-hidden"

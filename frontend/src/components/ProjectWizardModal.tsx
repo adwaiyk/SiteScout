@@ -32,14 +32,12 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 
-// ---------- Types ----------
-
 export interface ProjectWizardData {
-  // Step 1: Identity & Sector
+  
   name: string;
   sector: string;
   optimizationObjective: string;
-  // Step 2: Spatial Constraints
+  
   targetRegion: string;
   plotScaleMin: number;
   plotScaleMax: number;
@@ -47,7 +45,7 @@ export interface ProjectWizardData {
   minVoltage: number;
   maxSlope: number;
   exclusionBuffers: string[];
-  // Step 3: Financial Defaults
+  
   maxLeaseBudget: number;
   targetWacc: number;
   projectLifespan: number;
@@ -58,8 +56,6 @@ interface ProjectWizardModalProps {
   onOpenChange: (open: boolean) => void;
   onProjectCreated: (projectId: string, config: ProjectWizardData) => void;
 }
-
-// ---------- Constants ----------
 
 const SECTORS = [
   { value: "solar_pv", label: "Solar PV Farm", icon: Sun },
@@ -94,8 +90,6 @@ const EXCLUSION_BUFFERS = [
   { id: "residential", label: "Residential Setbacks [300m]" },
 ];
 
-// ---------- Default values ----------
-
 const DEFAULT_WIZARD_DATA: ProjectWizardData = {
   name: "",
   sector: "solar_pv",
@@ -111,8 +105,6 @@ const DEFAULT_WIZARD_DATA: ProjectWizardData = {
   targetWacc: 6.5,
   projectLifespan: 25,
 };
-
-// ---------- Component ----------
 
 export default function ProjectWizardModal({
   open,
@@ -148,7 +140,7 @@ export default function ProjectWizardModal({
     setError("");
 
     try {
-      // Create project via backend API
+      
       const res = await api.post("/projects/", {
         name: data.name,
         description: `${SECTORS.find((s) => s.value === data.sector)?.label || data.sector} — ${OPTIMIZATION_OBJECTIVES.find((o) => o.value === data.optimizationObjective)?.label || data.optimizationObjective}`,
@@ -156,13 +148,11 @@ export default function ProjectWizardModal({
 
       const projectId = res.data.project_id;
 
-      // Store wizard configuration in localStorage (frontend-only for now)
       localStorage.setItem(
         `project_config_${projectId}`,
         JSON.stringify(data)
       );
 
-      // Reset state
       setStep(1);
       setData({ ...DEFAULT_WIZARD_DATA });
       onProjectCreated(projectId, data);
@@ -197,7 +187,7 @@ export default function ProjectWizardModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Step indicator */}
+        {}
         <div className="flex items-center gap-2 py-2">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2 flex-1">
@@ -225,10 +215,10 @@ export default function ProjectWizardModal({
           ))}
         </div>
 
-        {/* ===== STEP 1: Identity & Sector ===== */}
+        {}
         {step === 1 && (
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-            {/* Project Name */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-project-name" className="text-sm font-medium">
                 Project Name <span className="text-destructive">*</span>
@@ -242,7 +232,7 @@ export default function ProjectWizardModal({
               />
             </div>
 
-            {/* Industry Sector */}
+            {}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
                 Industry Sector <span className="text-destructive">*</span>
@@ -272,7 +262,7 @@ export default function ProjectWizardModal({
               </div>
             </div>
 
-            {/* Optimization Objective */}
+            {}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
                 Optimization Objective <span className="text-destructive">*</span>
@@ -312,10 +302,10 @@ export default function ProjectWizardModal({
           </div>
         )}
 
-        {/* ===== STEP 2: Spatial & Technical Constraints ===== */}
+        {}
         {step === 2 && (
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-            {/* Target Region */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-region" className="text-sm font-medium">
                 Target Region <span className="text-destructive">*</span>
@@ -332,7 +322,7 @@ export default function ProjectWizardModal({
               </select>
             </div>
 
-            {/* Plot Scale */}
+            {}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Plot Scale (Acres)</Label>
               <div className="grid grid-cols-2 gap-3">
@@ -359,7 +349,7 @@ export default function ProjectWizardModal({
               </div>
             </div>
 
-            {/* Grid Interconnection */}
+            {}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Grid Interconnection</Label>
               <div className="grid grid-cols-2 gap-3">
@@ -386,7 +376,7 @@ export default function ProjectWizardModal({
               </div>
             </div>
 
-            {/* Topography */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-slope" className="text-sm font-medium">
                 Maximum Allowable Land Slope (%)
@@ -408,7 +398,7 @@ export default function ProjectWizardModal({
               </div>
             </div>
 
-            {/* Exclusion Buffers */}
+            {}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Exclusion Buffers</Label>
               <div className="space-y-2">
@@ -429,7 +419,7 @@ export default function ProjectWizardModal({
           </div>
         )}
 
-        {/* ===== STEP 3: Financial Defaults ===== */}
+        {}
         {step === 3 && (
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 text-sm text-blue-400">
@@ -437,7 +427,7 @@ export default function ProjectWizardModal({
               These fields are optional. Default values will be used if left unchanged.
             </div>
 
-            {/* Max Lease Budget */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-lease" className="text-sm font-medium">
                 Max Lease Budget ($/acre/year)
@@ -453,7 +443,7 @@ export default function ProjectWizardModal({
               />
             </div>
 
-            {/* Target WACC */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-wacc" className="text-sm font-medium">
                 Target WACC / Discount Rate (%)
@@ -470,7 +460,7 @@ export default function ProjectWizardModal({
               />
             </div>
 
-            {/* Project Lifespan */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="wizard-lifespan" className="text-sm font-medium">
                 Project Operational Lifespan (Years)
@@ -488,14 +478,14 @@ export default function ProjectWizardModal({
           </div>
         )}
 
-        {/* Error */}
+        {}
         {error && (
           <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
             <p className="text-sm font-medium text-destructive">{error}</p>
           </div>
         )}
 
-        {/* Footer Navigation */}
+        {}
         <DialogFooter className="flex-row gap-3 sm:justify-between">
           <div>
             {step > 1 && (

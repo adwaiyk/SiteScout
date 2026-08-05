@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// ---------- Password strength logic ----------
 function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
   let score = 0;
   if (pw.length >= 8) score++;
@@ -35,7 +34,6 @@ function getPasswordStrength(pw: string): { score: number; label: string; color:
   return { score, label: "Excellent", color: "bg-emerald-400" };
 }
 
-// ---------- Role options ----------
 const ROLES = [
   { value: "planner", label: "Site Planner", desc: "Evaluate and select deployment locations", icon: "🗺️" },
   { value: "gis_analyst", label: "GIS Analyst", desc: "Perform spatial analysis and mapping", icon: "📊" },
@@ -48,13 +46,11 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
 
-  // Step 1 fields
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Step 2 fields
   const [role, setRole] = useState("planner");
   const [organization, setOrganization] = useState("");
 
@@ -122,12 +118,12 @@ export default function SignupPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Left: Animated Hero Panel */}
+      {}
       <div className="relative hidden bg-muted lg:block overflow-hidden">
-        {/* Gradient */}
+        {}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-blue-950 to-slate-900" />
 
-        {/* Grid pattern */}
+        {}
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{
@@ -136,14 +132,14 @@ export default function SignupPage() {
           }}
         />
 
-        {/* Glow orbs */}
+        {}
         <div className="absolute top-1/3 left-1/3 h-72 w-72 rounded-full bg-indigo-500/20 blur-[120px] animate-pulse" />
         <div
           className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full bg-blue-500/20 blur-[80px] animate-pulse"
           style={{ animationDelay: "1.5s" }}
         />
 
-        {/* Content */}
+        {}
         <div className="absolute inset-0 flex flex-col justify-between p-10 text-white">
           <div className="flex-1 flex flex-col justify-center space-y-6">
             <div className="space-y-3">
@@ -161,7 +157,7 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Trust indicators */}
+            {}
             <div className="space-y-3 max-w-xs">
               {[
                 "ML-powered solar & wind yield forecasting",
@@ -187,12 +183,12 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Right: Multi-step Form */}
+      {}
       <div className="flex flex-col gap-4 p-6 md:p-10 justify-center items-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 pointer-events-none" />
 
         <div className="w-full max-w-sm space-y-6 relative z-10">
-          {/* Brand */}
+          {}
           <div className="flex items-center gap-2.5 font-semibold text-lg">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25">
               <GalleryVerticalEnd className="size-4" />
@@ -200,7 +196,7 @@ export default function SignupPage() {
             <span className="tracking-tight">SiteScout</span>
           </div>
 
-          {/* Step indicator */}
+          {}
           <div className="flex items-center gap-3">
             {[1, 2].map((s) => (
               <div key={s} className="flex items-center gap-2">
@@ -227,7 +223,7 @@ export default function SignupPage() {
             ))}
           </div>
 
-          {/* Step 1: Name / Email / Password */}
+          {}
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="space-y-2 mb-6">
@@ -282,7 +278,7 @@ export default function SignupPage() {
                     </button>
                   </div>
 
-                  {/* Password strength meter */}
+                  {}
                   {password.length > 0 && (
                     <div className="space-y-1.5 animate-in fade-in duration-200">
                       <div className="flex gap-1">
@@ -313,7 +309,7 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* Step 2: Role & Organization */}
+          {}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="space-y-2 mb-6">
@@ -322,7 +318,7 @@ export default function SignupPage() {
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
-                {/* Role selection */}
+                {}
                 <div className="space-y-2">
                   <Label>Your Role</Label>
                   <div className="space-y-2">

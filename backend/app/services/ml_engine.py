@@ -544,6 +544,7 @@ class SHAPExplainer:
         )
         model.fit(X, y)
 
+        self._synthetic_background = X
         self._model = model
         self._model_type = "LightGBM (Synthetic Suitability Model)"
         logger.info("SHAP: LightGBM synthetic model trained successfully.")
@@ -573,10 +574,14 @@ class SHAPExplainer:
 
         # Build feature DataFrames
         target_df = self._feature_vector_to_df(target_site)
-        background_df = pd.concat(
-            [self._feature_vector_to_df(s) for s in all_sites],
-            ignore_index=True,
-        )
+        if len(all_sites) <= 3 and hasattr(self, "_synthetic_background"):
+            logger.info("SHAP: Not enough project sites (%d), using synthetic background.", len(all_sites))
+            background_df = self._synthetic_background
+        else:
+            background_df = pd.concat(
+                [self._feature_vector_to_df(s) for s in all_sites],
+                ignore_index=True,
+            )
 
         # Initialize SHAP explainer lazily (uses all project sites as background)
         if self._explainer is None or True:  # Re-create per call for varying backgrounds

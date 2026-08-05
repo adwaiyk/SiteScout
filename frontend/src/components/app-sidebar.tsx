@@ -186,42 +186,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* SETTINGS GROUP (Collapsible) */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger className="w-full focus:outline-none">
-                    <SidebarMenuButton
-                      render={<div />}
-                      className="w-full cursor-pointer"
-                    >
-                      <Sliders className="h-4 w-4 mr-2" />
-                      <span>Account Settings</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="border-l border-border ml-3.5 pl-2 space-y-1">
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton render={<Link href="/dashboard/profile" />}>
-                          Profile
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton render={<Link href="/dashboard/api-keys" />}>
-                          API Keys
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+
       </SidebarContent>
 
       {/* FOOTER */}

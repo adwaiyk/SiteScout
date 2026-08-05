@@ -64,10 +64,6 @@ interface ProjectWizardModalProps {
 const SECTORS = [
   { value: "solar_pv", label: "Solar PV Farm", icon: Sun },
   { value: "wind_energy", label: "Wind Energy", icon: Wind },
-  { value: "bess", label: "BESS / Battery Storage", icon: Battery },
-  { value: "ev_charging", label: "EV Charging Hub", icon: Car },
-  { value: "logistics", label: "Logistics / Warehousing", icon: Warehouse },
-  { value: "commercial_re", label: "Commercial Real Estate", icon: Building2 },
 ];
 
 const OPTIMIZATION_OBJECTIVES = [

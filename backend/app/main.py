@@ -12,7 +12,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import analysis, auth, intelligence, projects
+from app.api.routes import analysis, auth, forecasting, intelligence, projects
 from app.database import Base, engine
 
 # ── Create database tables if they don't exist ────────────────────────────
@@ -59,3 +59,4 @@ app.include_router(auth.router)
 app.include_router(projects.router)
 app.include_router(analysis.router)
 app.include_router(intelligence.router)
+app.include_router(forecasting.router)

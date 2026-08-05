@@ -94,7 +94,7 @@ export default function LandingPage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
             <Zap className="h-3.5 w-3.5" />
-            AI-Powered Spatial Intelligence Platform
+            SiteScout
           </div>
 
           {/* Title */}

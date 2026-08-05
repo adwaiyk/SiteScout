@@ -476,23 +476,10 @@ class SHAPExplainer:
 
     def _load_or_create_model(self) -> None:
         """
-        Try loading the trained XGBoost solar model.
-        Falls back to training a fresh LightGBM on synthetic data.
+        Train a fresh LightGBM on synthetic suitability data.
+        This provides a model that mirrors the deterministic weighted scoring engine,
+        allowing SHAP to explain the suitability scores.
         """
-        import joblib
-
-        solar_model_path = os.path.join(_settings.ML_MODELS_DIR, "solar_model.joblib")
-
-        if os.path.exists(solar_model_path):
-            try:
-                self._model = joblib.load(solar_model_path)
-                self._model_type = "XGBoost (Trained Solar Model)"
-                logger.info("SHAP: Loaded trained XGBoost model from %s", solar_model_path)
-                return
-            except Exception as e:
-                logger.warning("SHAP: Failed to load XGBoost model: %s", e)
-
-        # Fallback: Train a fresh LightGBM on synthetic suitability data
         logger.info("SHAP: Training fresh LightGBM suitability model on synthetic data...")
         self._train_synthetic_model()
 

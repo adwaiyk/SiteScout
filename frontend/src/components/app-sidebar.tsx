@@ -42,6 +42,8 @@ import {
   ChevronsUpDown,
   LogOut,
   Bell,
+  Target,
+  MapPin,
 } from "lucide-react";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -136,6 +138,27 @@ export function AppSidebar() {
                 <SidebarMenuButton render={<Link href="/dashboard/projects" />}>
                   <Folder className="h-4 w-4 mr-2" />
                   <span>My Projects</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* DASHBOARDS GROUP */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Dashboards</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/dashboard/planner" />}>
+                  <Target className="h-4 w-4 mr-2" />
+                  <span>Planner</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/dashboard/gis-analyst" />}>
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>GIS Analyst</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

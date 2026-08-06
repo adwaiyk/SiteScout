@@ -1,21 +1,17 @@
-from pydantic import BaseModel, EmailStr
+from __future__ import annotations
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
+from pydantic import BaseModel, ConfigDict
 
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
-    full_name: str
-    role: str
-    organization: Optional[str] = None
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    
 class ProjectCreate(BaseModel):
     name: str
     description: Optional[str] = None
+
+class ProjectResponse(ProjectCreate):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    created_at: Optional[datetime] = None
 
 class SiteCreate(BaseModel):
     name: str

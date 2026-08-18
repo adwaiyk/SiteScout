@@ -61,3 +61,6 @@ rsa==4.9.1
 six==1.17.0
 typing-inspection==0.4.2
 typing_extensions==4.16.0
+
+# LLM — Groq API
+groq>=0.9.0

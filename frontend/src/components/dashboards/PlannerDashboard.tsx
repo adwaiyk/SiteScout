@@ -14,18 +14,15 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  Legend,
   ReferenceLine,
 } from "recharts";
 import {
   Loader2,
   TrendingUp,
   Brain,
-  Zap,
-  Target,
-  ChevronDown,
   AlertTriangle,
-  Info,
+  Target,
+  Zap,
 } from "lucide-react";
 import api from "@/lib/api";
 
@@ -121,7 +118,7 @@ export default function PlannerDashboard() {
           { site_id: siteId }
         );
         setShapExplanation(shapRes.data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("SHAP error:", err);
         setShapExplanation(null);
       } finally {
@@ -135,7 +132,7 @@ export default function PlannerDashboard() {
           { site_id: siteId, capacity_mw: 1.0, system_loss_pct: 14.0 }
         );
         setForecastData(fcRes.data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Forecast error:", err);
         setForecastData(null);
       } finally {
@@ -174,8 +171,10 @@ export default function PlannerDashboard() {
         setSelectedSiteId(firstSiteId);
         fetchSiteIntelligence(projectId, firstSiteId);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Optimization failed");
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const e = err as any;
+      setError(e.response?.data?.detail || e.message || "Optimization failed");
     } finally {
       setLoading(false);
     }
@@ -388,7 +387,7 @@ export default function PlannerDashboard() {
                 />
                 <Scatter
                   data={scatterData}
-                  onClick={(data: any) => {
+                  onClick={(data: { site_id?: string }) => {
                     if (data?.site_id) handleSiteSelect(data.site_id);
                   }}
                   cursor="pointer"
@@ -621,8 +620,11 @@ export default function PlannerDashboard() {
                     <Tooltip
                       content={({ active, payload, label }) => {
                         if (!active || !payload?.length) return null;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p10 = payload.find((p: any) => p.dataKey === "p10")?.value;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p50 = payload.find((p: any) => p.dataKey === "p50")?.value;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p90 = payload.find((p: any) => p.dataKey === "p90")?.value;
                         return (
                           <div className="rounded-lg border border-border bg-popover p-3 text-xs shadow-xl">

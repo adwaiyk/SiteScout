@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cachedName = localStorage.getItem("userName");
       const cachedEmail = localStorage.getItem("userEmail");
       if (cachedName && cachedEmail) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser({ name: cachedName, email: cachedEmail });
       }
 

@@ -69,6 +69,7 @@ export function AppSidebar() {
         .toUpperCase()
         .slice(0, 2);
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser({
         name: storedName,
         email: storedEmail || "",

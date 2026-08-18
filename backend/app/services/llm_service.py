@@ -91,7 +91,7 @@ def generate_investment_narrative(analysis_data: Dict[str, Any]) -> Dict[str, An
             timeout=15.0,
         )
 
-        narrative = response.choices[0].message.content.strip()
+        narrative = (response.choices[0].message.content or "").strip()
         return {
             "narrative": narrative,
             "available": True,
@@ -151,7 +151,7 @@ def answer_site_question(
             timeout=15.0,
         )
 
-        answer = response.choices[0].message.content.strip()
+        answer = (response.choices[0].message.content or "").strip()
         return {
             "answer": answer,
             "available": True,

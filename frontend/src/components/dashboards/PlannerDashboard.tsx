@@ -100,7 +100,14 @@ export default function PlannerDashboard() {
   const [forecastLoading, setForecastLoading] = useState(false);
 
   useEffect(() => {
-    api.get("/projects/").then((res) => setProjects(res.data)).catch(console.error);
+    api.get("/projects/").then((res) => {
+      setProjects(res.data);
+      // Restore last selected project from sessionStorage
+      const savedId = sessionStorage.getItem("planner_selectedProjectId");
+      if (savedId && res.data.some((p: Project) => p.id === savedId)) {
+        setSelectedProjectId(savedId);
+      }
+    }).catch(console.error);
   }, []);
 
   const fetchSiteIntelligence = useCallback(
@@ -250,7 +257,7 @@ export default function PlannerDashboard() {
           <select
             id="planner-project-select"
             value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
+            onChange={(e) => { setSelectedProjectId(e.target.value); sessionStorage.setItem("planner_selectedProjectId", e.target.value); }}
             className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 appearance-none cursor-pointer"
           >
             <option value="">Select Project</option>

@@ -128,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("onboarding_complete");
+    localStorage.removeItem("lastActiveProjectId");
     setUser(null);
     router.replace("/login");
   }, [router]);

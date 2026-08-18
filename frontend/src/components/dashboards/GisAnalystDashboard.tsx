@@ -164,7 +164,13 @@ export default function GisAnalystDashboard() {
   }, [selectedProjectId]);
 
   useEffect(() => {
-    api.get("/projects/").then((res) => setProjects(res.data)).catch(console.error);
+    api.get("/projects/").then((res) => {
+      setProjects(res.data);
+      const savedId = sessionStorage.getItem("gis_selectedProjectId");
+      if (savedId && res.data.some((p: Project) => p.id === savedId)) {
+        setSelectedProjectId(savedId);
+      }
+    }).catch(console.error);
   }, []);
 
   const scoreSites = useCallback(
@@ -316,7 +322,7 @@ export default function GisAnalystDashboard() {
           <select
             id="gis-project-select"
             value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
+            onChange={(e) => { setSelectedProjectId(e.target.value); sessionStorage.setItem("gis_selectedProjectId", e.target.value); }}
             className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer"
           >
             <option value="">Select Project</option>

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMapEvents,
+  useMap,
   LayersControl,
   Circle,
+  GeoJSON,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -36,17 +38,53 @@ function createColorIcon(color: string) {
   });
 }
 
+function createInfraIcon(type: "substation" | "power_line" | "road") {
+  const colors = { substation: "#8b5cf6", power_line: "#f59e0b", road: "#6b7280" };
+  const symbols = { substation: "⚡", power_line: "⚡", road: "🛣" };
+  return new L.DivIcon({
+    className: "infra-marker",
+    html: `<div style="
+      width: 18px; height: 18px;
+      background: ${colors[type]};
+      border: 2px solid white;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; color: white;
+    ">${symbols[type]}</div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
+}
+
 const RESULT_ICONS = {
   excellent: createColorIcon("#10b981"),
   viable: createColorIcon("#f59e0b"),
   unsuitable: createColorIcon("#ef4444"),
 };
 
-interface SiteMarker {
+export interface SiteMarker {
   id: string;
   position: [number, number];
   label: string;
   rating: "excellent" | "viable" | "unsuitable";
+  score?: number;
+}
+
+export interface InfraMarker {
+  id: string;
+  position: [number, number];
+  label: string;
+  type: "substation" | "power_line" | "road";
+  distance_km?: number;
+}
+
+export interface ConflictZone {
+  id: string;
+  center: [number, number];
+  radius_m: number;
+  type: string;
+  severity: "hard" | "warning" | "info";
 }
 
 interface MapScannerProps {
@@ -55,6 +93,8 @@ interface MapScannerProps {
   center?: [number, number];
   zoom?: number;
   siteMarkers?: SiteMarker[];
+  infraMarkers?: InfraMarker[];
+  conflictZones?: ConflictZone[];
 }
 
 function LocationMarker({
@@ -91,6 +131,8 @@ function LayerControlPanel({
   setShowWind,
   showInfra,
   setShowInfra,
+  showConflicts,
+  setShowConflicts,
 }: {
   showSolar: boolean;
   setShowSolar: (v: boolean) => void;
@@ -98,6 +140,8 @@ function LayerControlPanel({
   setShowWind: (v: boolean) => void;
   showInfra: boolean;
   setShowInfra: (v: boolean) => void;
+  showConflicts: boolean;
+  setShowConflicts: (v: boolean) => void;
 }) {
   return (
     <div className="absolute top-3 right-3 z-[1000] bg-background/90 backdrop-blur-md border border-border rounded-lg p-3 shadow-lg min-w-[180px]">
@@ -109,6 +153,7 @@ function LayerControlPanel({
           { label: "Solar GHI Heatmap", checked: showSolar, toggle: setShowSolar, color: "bg-amber-500" },
           { label: "Wind Speed Layer", checked: showWind, toggle: setShowWind, color: "bg-cyan-500" },
           { label: "Infrastructure", checked: showInfra, toggle: setShowInfra, color: "bg-violet-500" },
+          { label: "Conflict Zones", checked: showConflicts, toggle: setShowConflicts, color: "bg-red-500" },
         ].map((layer) => (
           <label
             key={layer.label}
@@ -155,16 +200,19 @@ export default function MapScanner({
   center,
   zoom = 7,
   siteMarkers = [],
+  infraMarkers = [],
+  conflictZones = [],
 }: MapScannerProps) {
   const [showSolar, setShowSolar] = useState(false);
   const [showWind, setShowWind] = useState(false);
   const [showInfra, setShowInfra] = useState(true);
+  const [showConflicts, setShowConflicts] = useState(true);
 
   const mapCenter: [number, number] = center || [19.7515, 75.7139];
 
   return (
     <div className="relative h-[560px] w-full rounded-lg overflow-hidden border border-border">
-      {}
+      {/* Custom Overlay Control Panel */}
       <LayerControlPanel
         showSolar={showSolar}
         setShowSolar={setShowSolar}
@@ -172,9 +220,11 @@ export default function MapScanner({
         setShowWind={setShowWind}
         showInfra={showInfra}
         setShowInfra={setShowInfra}
+        showConflicts={showConflicts}
+        setShowConflicts={setShowConflicts}
       />
 
-      {}
+      {/* Coordinate Display */}
       <CoordinateDisplay pos={selectedPos} />
 
       <MapContainer
@@ -184,9 +234,8 @@ export default function MapScanner({
         className="h-full w-full"
         zoomControl={true}
       >
-        {}
+        {/* Base Layer Switcher */}
         <LayersControl position="bottomright">
-          {}
           <LayersControl.BaseLayer checked name="Streets">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -209,28 +258,31 @@ export default function MapScanner({
           </LayersControl.BaseLayer>
         </LayersControl>
 
-        {}
+        {/* Infrastructure overlay: OpenInfraMap power layer */}
         {showInfra && (
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            opacity={0.3}
+            url="https://tiles-{s}.openinframap.org/power/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://openinframap.org">OpenInfraMap</a>'
+            subdomains={["a", "b", "c"]}
+            opacity={0.7}
+            maxZoom={18}
           />
         )}
 
-        {}
+        {/* Click handler + selected marker */}
         <LocationMarker
           onLocationSelect={onLocationSelect}
           selectedPos={selectedPos}
         />
 
-        {}
+        {/* Scan radius circle */}
         {selectedPos && (
           <Circle
             center={selectedPos}
             radius={5000}
             pathOptions={{
-              color: "#3b82f6",
-              fillColor: "#3b82f6",
+              color: "hsl(175, 60%, 50%)",
+              fillColor: "hsl(175, 60%, 50%)",
               fillOpacity: 0.08,
               weight: 1,
               dashArray: "4 4",
@@ -238,7 +290,57 @@ export default function MapScanner({
           />
         )}
 
-        {}
+        {/* Infrastructure markers */}
+        {showInfra &&
+          infraMarkers.map((m) => (
+            <Marker key={m.id} position={m.position} icon={createInfraIcon(m.type)}>
+              <Popup>
+                <div className="text-xs space-y-1">
+                  <p className="font-semibold">{m.label}</p>
+                  <p className="text-muted-foreground capitalize">{m.type.replace("_", " ")}</p>
+                  {m.distance_km !== undefined && (
+                    <p className="text-muted-foreground">{m.distance_km.toFixed(1)} km from site</p>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+        {/* Conflict zones */}
+        {showConflicts &&
+          conflictZones.map((cz) => (
+            <Circle
+              key={cz.id}
+              center={cz.center}
+              radius={cz.radius_m}
+              pathOptions={{
+                color: cz.severity === "hard" ? "#ef4444" : cz.severity === "warning" ? "#f59e0b" : "#6b7280",
+                fillColor: cz.severity === "hard" ? "#ef4444" : cz.severity === "warning" ? "#f59e0b" : "#6b7280",
+                fillOpacity: 0.12,
+                weight: 2,
+                dashArray: cz.severity === "hard" ? undefined : "4 4",
+              }}
+            >
+              <Popup>
+                <div className="text-xs space-y-1">
+                  <p className="font-semibold">{cz.type}</p>
+                  <span
+                    className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      cz.severity === "hard"
+                        ? "bg-red-500/20 text-red-600"
+                        : cz.severity === "warning"
+                          ? "bg-amber-500/20 text-amber-600"
+                          : "bg-gray-500/20 text-gray-600"
+                    }`}
+                  >
+                    {cz.severity === "hard" ? "Restricted" : cz.severity === "warning" ? "Warning" : "Info"}
+                  </span>
+                </div>
+              </Popup>
+            </Circle>
+          ))}
+
+        {/* Site result markers */}
         {siteMarkers.map((marker) => (
           <Marker
             key={marker.id}
@@ -248,6 +350,9 @@ export default function MapScanner({
             <Popup>
               <div className="text-xs space-y-1">
                 <p className="font-semibold">{marker.label}</p>
+                {marker.score !== undefined && (
+                  <p className="text-muted-foreground">Score: {marker.score.toFixed(0)}/100</p>
+                )}
                 <span
                   className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
                     marker.rating === "excellent"

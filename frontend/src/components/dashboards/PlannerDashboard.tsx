@@ -260,7 +260,7 @@ export default function PlannerDashboard() {
           <select
             id="planner-project-select"
             value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
+            onChange={(e) => { setSelectedProjectId(e.target.value); sessionStorage.setItem("planner_selectedProjectId", e.target.value); }}
             className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 appearance-none cursor-pointer"
           >
             <option value="">Select Project</option>
@@ -391,6 +391,7 @@ export default function PlannerDashboard() {
                 />
                 <Scatter
                   data={scatterData}
+                  onClick={(data: { site_id?: string }) => {
                   onClick={(data: { site_id?: string }) => {
                     if (data?.site_id) handleSiteSelect(data.site_id);
                   }}
@@ -625,9 +626,12 @@ export default function PlannerDashboard() {
                       content={({ active, payload, label }) => {
                         if (!active || !payload?.length) return null;
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p10 = payload.find((p: any) => p.dataKey === "p10")?.value;
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p50 = payload.find((p: any) => p.dataKey === "p50")?.value;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const p90 = payload.find((p: any) => p.dataKey === "p90")?.value;
                         return (

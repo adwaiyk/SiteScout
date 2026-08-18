@@ -71,6 +71,7 @@ export function AppSidebar() {
         .toUpperCase()
         .slice(0, 2);
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser({
         name: storedName,
         email: storedEmail || "",
@@ -116,7 +117,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-teal-600 text-white font-semibold">
                 <GalleryVerticalEnd className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">

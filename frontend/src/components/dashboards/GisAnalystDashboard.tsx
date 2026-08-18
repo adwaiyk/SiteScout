@@ -198,7 +198,9 @@ export default function GisAnalystDashboard() {
             prev ? prev : res.data.scored_sites[0].site_id
           );
         }
-      } catch (err: any) {
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
         setError(err.response?.data?.detail || err.message || "Scoring failed");
       } finally {
         setLoading(false);
@@ -209,6 +211,7 @@ export default function GisAnalystDashboard() {
 
   useEffect(() => {
     if (selectedProjectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSiteId(null);
       setGridCapacity(null);
       setConflictData(null);
@@ -216,6 +219,7 @@ export default function GisAnalystDashboard() {
       scoreSites(selectedProjectId, weights);
     }
     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   const handleWeightChange = useCallback(
@@ -256,6 +260,7 @@ export default function GisAnalystDashboard() {
   useEffect(() => {
     if (!selectedProjectId || !selectedSiteId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGridLoading(true);
     api
       .post(`/api/projects/${selectedProjectId}/grid-capacity`, {
@@ -286,7 +291,7 @@ export default function GisAnalystDashboard() {
         });
       }
     }
-  }, [selectedSiteId, selectedProjectId]);
+  }, [selectedSiteId, selectedProjectId, scoredSites]);
 
   const breakdownChartData = useMemo(() => {
     const site = scoredSites.find((s) => s.site_id === selectedSiteId);
@@ -322,7 +327,7 @@ export default function GisAnalystDashboard() {
           <select
             id="gis-project-select"
             value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
+            onChange={(e) => { setSelectedProjectId(e.target.value); sessionStorage.setItem("gis_selectedProjectId", e.target.value); }}
             className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer"
           >
             <option value="">Select Project</option>

@@ -54,6 +54,6 @@ class ScanLog(Base):
     solar_yield_mwh = Column(Numeric, nullable=True)
     wind_yield_mwh = Column(Numeric, nullable=True)
     is_unsuitable = Column(Boolean, default=False)
-    full_analysis_json = Column(JSON, nullable=False)
+    full_analysis_json = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), default=_utcnow)
     site = relationship('Site', back_populates='logs')

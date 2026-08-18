@@ -102,7 +102,20 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchProjects();
+    fetchProjects().then(() => {
+      // Restore last active project from localStorage
+      const lastProjectId = localStorage.getItem("lastActiveProjectId");
+      if (lastProjectId) {
+        // We'll restore after projects state is set — use a small timeout
+        setTimeout(() => {
+          setProjects((prev) => {
+            const found = prev.find((p) => p.id === lastProjectId);
+            if (found) handleSelectProject(found);
+            return prev;
+          });
+        }, 0);
+      }
+    });
   }, [fetchProjects]);
 
   const handleSelectProject = (project: Project) => {
@@ -110,6 +123,9 @@ export default function DashboardPage() {
     setAnalysis(null);
     setSelectedCoords(null);
     setError(null);
+
+    // Persist active project for cross-session restore
+    localStorage.setItem("lastActiveProjectId", project.id);
 
     const stored = localStorage.getItem(`project_config_${project.id}`);
     if (stored) {

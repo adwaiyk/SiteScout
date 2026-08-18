@@ -43,19 +43,24 @@ export default function ReportsPage() {
   const [narrative, setNarrative] = useState<string | null>(null);
 
   useEffect(() => {
-    api.get("/projects/").then((r) => setProjects(r.data)).catch(console.error);
+    api.get("/projects/").then((r) => {
+      setProjects(r.data);
+      if (r.data && r.data.length > 0) {
+        setSelectedProjectId(r.data[r.data.length - 1].id);
+      }
+    }).catch(console.error);
   }, []);
 
   useEffect(() => {
     if (!selectedProjectId) { setSites([]); return; }
-    // Fetch sites for the project by loading scan logs
-    api.get(`/projects/`).then((r) => {
-      // We need to get sites — the API returns projects. 
-      // Use the analysis scan approach to get sites from the project
+    api.get(`/projects/${selectedProjectId}/sites`).then((r) => {
+      setSites(r.data);
+      if (r.data && r.data.length > 0) {
+        setSelectedSiteId(r.data[0].id);
+      } else {
+        setSelectedSiteId("");
+      }
     }).catch(console.error);
-    // Alternative: fetch sites from analysis data
-    setSites([]);
-    setSelectedSiteId("");
     setReport(null);
   }, [selectedProjectId]);
 
@@ -103,6 +108,12 @@ export default function ReportsPage() {
   const env = report?.environmental_data;
   const infra = report?.infrastructure_data;
 
+  useEffect(() => {
+    if (selectedProjectId && selectedSiteId) {
+      runFullAnalysis();
+    }
+  }, [selectedProjectId, selectedSiteId, runFullAnalysis]);
+
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto min-h-[calc(100vh-3.5rem)]">
       {/* Header */}
@@ -127,13 +138,14 @@ export default function ReportsPage() {
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
 
-          <input
-            type="text"
-            placeholder="Site ID (paste UUID)"
+          <select
             value={selectedSiteId}
             onChange={(e) => setSelectedSiteId(e.target.value)}
-            className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 w-64 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
+            className="h-9 rounded-lg border border-border bg-card text-foreground text-sm px-3 w-64 focus:outline-none focus:ring-2 focus:ring-primary/40 appearance-none cursor-pointer"
+          >
+            <option value="">Select Site</option>
+            {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
 
           <button
             onClick={runFullAnalysis}

@@ -164,7 +164,13 @@ export default function GisAnalystDashboard() {
   }, [selectedProjectId]);
 
   useEffect(() => {
-    api.get("/projects/").then((res) => setProjects(res.data)).catch(console.error);
+    api.get("/projects/").then((res) => {
+      setProjects(res.data);
+      if (res.data && res.data.length > 0) {
+        const latestProject = res.data[res.data.length - 1];
+        setSelectedProjectId(latestProject.id);
+      }
+    }).catch(console.error);
   }, []);
 
   const scoreSites = useCallback(

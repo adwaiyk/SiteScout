@@ -46,9 +46,11 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import api from "@/lib/api";
 
 export function AppSidebar() {
+  const pathname = usePathname();
   const [user, setUser] = useState({
     name: "SiteScout Admin",
     email: "admin@sitescout.io",
@@ -149,13 +151,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/dashboard/planner" />}>
+                <SidebarMenuButton isActive={pathname === "/dashboard/planner"} render={<Link href="/dashboard/planner" />}>
                   <Target className="h-4 w-4 mr-2" />
                   <span>Planner</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/dashboard/gis-analyst" />}>
+                <SidebarMenuButton isActive={pathname === "/dashboard/gis-analyst"} render={<Link href="/dashboard/gis-analyst" />}>
                   <MapPin className="h-4 w-4 mr-2" />
                   <span>GIS Analyst</span>
                 </SidebarMenuButton>
@@ -170,13 +172,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/dashboard/reports" />}>
+                <SidebarMenuButton isActive={pathname === "/dashboard/reports"} render={<Link href="/dashboard/reports" />}>
                   <FileText className="h-4 w-4 mr-2" />
                   <span>Feasibility Reports</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/dashboard/calculator" />}>
+                <SidebarMenuButton isActive={pathname === "/dashboard/calculator"} render={<Link href="/dashboard/calculator" />}>
                   <Calculator className="h-4 w-4 mr-2" />
                   <span>Yield Calculator</span>
                 </SidebarMenuButton>

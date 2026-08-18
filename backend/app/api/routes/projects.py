@@ -25,6 +25,14 @@ def get_user_projects(db: Session=Depends(get_db), current_user: User=Depends(ge
     projects = db.query(Project).filter(Project.owner_id == current_user.id).all()
     return projects
 
+@router.get('/{project_id}/sites', status_code=status.HTTP_200_OK)
+def get_project_sites(project_id: str, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)) -> list:
+    project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Project not found or unauthorized')
+    sites = db.query(Site).filter(Site.project_id == project.id).all()
+    return [{"id": str(s.id), "name": s.name} for s in sites]
+
 @router.post('/{project_id}/sites', status_code=status.HTTP_201_CREATED)
 def register_site(project_id: str, site: SiteCreate, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)) -> dict:
     project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()

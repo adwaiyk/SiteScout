@@ -166,9 +166,9 @@ export default function GisAnalystDashboard() {
   useEffect(() => {
     api.get("/projects/").then((res) => {
       setProjects(res.data);
-      const savedId = sessionStorage.getItem("gis_selectedProjectId");
-      if (savedId && res.data.some((p: Project) => p.id === savedId)) {
-        setSelectedProjectId(savedId);
+      if (res.data && res.data.length > 0) {
+        const latestProject = res.data[res.data.length - 1];
+        setSelectedProjectId(latestProject.id);
       }
     }).catch(console.error);
   }, []);
@@ -198,7 +198,9 @@ export default function GisAnalystDashboard() {
             prev ? prev : res.data.scored_sites[0].site_id
           );
         }
-      } catch (err: any) {
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
         setError(err.response?.data?.detail || err.message || "Scoring failed");
       } finally {
         setLoading(false);
@@ -209,6 +211,7 @@ export default function GisAnalystDashboard() {
 
   useEffect(() => {
     if (selectedProjectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSiteId(null);
       setGridCapacity(null);
       setConflictData(null);
@@ -216,6 +219,7 @@ export default function GisAnalystDashboard() {
       scoreSites(selectedProjectId, weights);
     }
     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   const handleWeightChange = useCallback(
@@ -256,6 +260,7 @@ export default function GisAnalystDashboard() {
   useEffect(() => {
     if (!selectedProjectId || !selectedSiteId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGridLoading(true);
     api
       .post(`/api/projects/${selectedProjectId}/grid-capacity`, {
@@ -286,7 +291,7 @@ export default function GisAnalystDashboard() {
         });
       }
     }
-  }, [selectedSiteId, selectedProjectId]);
+  }, [selectedSiteId, selectedProjectId, scoredSites]);
 
   const breakdownChartData = useMemo(() => {
     const site = scoredSites.find((s) => s.site_id === selectedSiteId);

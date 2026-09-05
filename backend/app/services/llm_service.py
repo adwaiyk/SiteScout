@@ -23,6 +23,10 @@ def _get_groq_client():
     try:
         from groq import Groq
         from app.config import get_settings
+
+        # Clear lru_cache to pick up any config changes
+        get_settings.cache_clear()
+
         settings = get_settings()
         api_key = getattr(settings, "GROQ_API_KEY", "")
         if not api_key:
@@ -32,7 +36,10 @@ def _get_groq_client():
 
         _groq_client = Groq(api_key=api_key)
         _groq_available = True
-        logger.info("Groq client initialized successfully.")
+        logger.info(
+            "Groq client initialized (model: %s).",
+            getattr(settings, "GROQ_MODEL", "compound-beta"),
+        )
         return _groq_client
     except ImportError:
         logger.warning("groq package not installed — AI features disabled.")
@@ -48,9 +55,9 @@ def _get_model_name() -> str:
     """Get the configured Groq model name."""
     try:
         from app.config import get_settings
-        return getattr(get_settings(), "GROQ_MODEL", "llama-3.3-70b-versatile")
+        return getattr(get_settings(), "GROQ_MODEL", "compound-beta")
     except Exception:
-        return "llama-3.3-70b-versatile"
+        return "compound-beta"
 
 
 def generate_investment_narrative(analysis_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -91,7 +98,7 @@ def generate_investment_narrative(analysis_data: Dict[str, Any]) -> Dict[str, An
             timeout=15.0,
         )
 
-        narrative = response.choices[0].message.content.strip()
+        narrative = (response.choices[0].message.content or "").strip()
         return {
             "narrative": narrative,
             "available": True,
@@ -151,7 +158,7 @@ def answer_site_question(
             timeout=15.0,
         )
 
-        answer = response.choices[0].message.content.strip()
+        answer = (response.choices[0].message.content or "").strip()
         return {
             "answer": answer,
             "available": True,

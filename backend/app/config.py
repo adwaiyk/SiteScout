@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     OVERPASS_URL: str = 'https://overpass-api.de/api/interpreter'
     OVERPASS_MIRROR_URL: str = 'https://overpass.kumi.systems/api/interpreter'
     GROQ_API_KEY: str = ''
-    GROQ_MODEL: str = 'llama-3.3-70b-versatile'
+    GROQ_MODEL: str = 'compound-beta'
 
 @lru_cache()
 def get_settings() -> Settings:

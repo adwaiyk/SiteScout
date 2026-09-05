@@ -27,9 +27,11 @@ logger = logging.getLogger(__name__)
 def _validate_coordinates(latitude: float, longitude: float) -> None:
     """Validate lat/lon range."""
     if not (-90.0 <= latitude <= 90.0):
-        raise ValueError(f"Invalid latitude: {latitude}. Must be between -90 and 90.")
+        raise ValueError(
+            f"Invalid latitude: {latitude}. Must be between -90 and 90.")
     if not (-180.0 <= longitude <= 180.0):
-        raise ValueError(f"Invalid longitude: {longitude}. Must be between -180 and 180.")
+        raise ValueError(
+            f"Invalid longitude: {longitude}. Must be between -180 and 180.")
 
 
 async def run_full_analysis(
@@ -77,11 +79,13 @@ async def run_full_analysis(
     avg_temp = float(nasa_data.get("annual_avg_temp_c", 25.0))
 
     # Infrastructure distances
-    dist_grid_km = osm_data.get("nearest_substation_km") or osm_data.get("nearest_power_line_km")
+    dist_grid_km = osm_data.get(
+        "nearest_substation_km") or osm_data.get("nearest_power_line_km")
     dist_road_km = osm_data.get("nearest_major_road_km")
 
     # Infer land cover if not provided
-    effective_land_cover = land_cover or infer_land_cover_from_conflicts(conflict_data)
+    effective_land_cover = land_cover or infer_land_cover_from_conflicts(
+        conflict_data)
 
     logger.info(
         "Stage 1 complete: GHI=%.2f, Wind=%.2f m/s, Temp=%.1f°C, LandCover=%s",
@@ -118,7 +122,8 @@ async def run_full_analysis(
     )
 
     # Use recommended energy type from feasibility check
-    effective_energy_type = feasibility.get("recommended_energy_type", energy_type)
+    effective_energy_type = feasibility.get(
+        "recommended_energy_type", energy_type)
 
     logger.info(
         "Stage 3 complete: Feasible=%s, Score=%.1f, Type=%s",
@@ -174,8 +179,10 @@ async def run_full_analysis(
     if effective_energy_type == "hybrid":
         solar_yield = energy_yield.get("solar_yield", {})
         wind_yield_data = energy_yield.get("wind_yield", {})
-        base_solar_mwh = solar_yield.get("annual_yield_mwh", 0.0) if solar_yield else 0.0
-        base_wind_mwh = wind_yield_data.get("annual_yield_mwh", 0.0) if wind_yield_data else 0.0
+        base_solar_mwh = solar_yield.get(
+            "annual_yield_mwh", 0.0) if solar_yield else 0.0
+        base_wind_mwh = wind_yield_data.get(
+            "annual_yield_mwh", 0.0) if wind_yield_data else 0.0
     elif effective_energy_type == "solar":
         base_solar_mwh = annual_mwh
         base_wind_mwh = 0.0
@@ -247,7 +254,8 @@ async def run_full_analysis(
             "error": f"AI summary unavailable — {type(e).__name__}",
         }
 
-    logger.info("Full analysis pipeline complete for (%.4f, %.4f)", latitude, longitude)
+    logger.info("Full analysis pipeline complete for (%.4f, %.4f)",
+                latitude, longitude)
     return result
 
 
@@ -264,7 +272,6 @@ def _build_recommendation(
     score = suitability.get("overall_score", 0)
     classification = suitability.get("classification", "Unknown")
     npv = financial.get("npv_usd", 0)
-    payback = financial.get("payback_period_years")
 
     if not is_feasible:
         verdict = "Not Recommended"

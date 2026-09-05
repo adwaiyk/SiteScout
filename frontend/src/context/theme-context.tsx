@@ -41,6 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       resolved = DEFAULT_THEME;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setThemeState(resolved);
     setMounted(true);
   }, []);
